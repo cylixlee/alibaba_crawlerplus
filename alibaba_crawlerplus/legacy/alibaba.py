@@ -172,7 +172,7 @@ def get_page(url, page=-1):
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, "html.parser")
     script_tag = soup.find(
-        "script", text=lambda text: text and "_PAGE_DATA_" in text
+        "script", string=lambda text: text and "_PAGE_DATA_" in text
     ).text
     lines = script_tag.splitlines()
     PAGE_DATA = lines[2][28:-1]
