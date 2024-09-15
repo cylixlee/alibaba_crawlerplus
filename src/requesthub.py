@@ -13,10 +13,17 @@ from datetime import datetime, timedelta
 from typing import override
 
 import requests
+from bs4 import BeautifulSoup, PageElement, ResultSet
 
 from .conf import CONFIG
-from .exceptions import RequestNotSuccessfulException
+from .exceptions import CaptchaException, RequestNotSuccessfulException
 from .locators import AbstractUrlLocator
+
+
+def _captcha_blocked(source: str) -> bool:
+    for landmark in CONFIG["captcha-detect"]["landmarks"]:
+        if landmark not in source:
+            return False
 
 
 class AbstractRequestHub(ABC):
@@ -66,7 +73,7 @@ class DefaultRequestHub(AbstractRequestHub):
         now = datetime.now()
         if now < next_request_time:
             interval = next_request_time - now
-            time.sleep(interval.seconds + 1)  # in case the interval is 0.99999s
+            time.sleep(interval.total_seconds() + 1)  # in case the interval is 0.99999s
         self.last_request_time = datetime.now()
 
         # send request through requests library
@@ -81,4 +88,53 @@ class DefaultRequestHub(AbstractRequestHub):
 
         if response.status_code != 200:
             raise RequestNotSuccessfulException(locator)
+
+        # captcha detection
+        html = BeautifulSoup(response.text, "html.parser")
+        scripts: ResultSet[PageElement] = html.find_all("script")
+        for script in scripts:
+            if _captcha_blocked(script.text):
+                raise CaptchaException(locator)
         return response.text
+
+
+class SleepyRequestHub(AbstractRequestHub):
+    """
+    Sleeps when received :class:`CaptchaException`, raises
+    :class:`RequestNotSuccessfulException` if sleep time exceeds the maximum sleep period.
+
+    This is a very simple and crude RequestHub: it does not use proxies to resist captcha,
+    it just sleeps until that disappears. The sleep interval is self-adaptive.
+    """
+
+    def __init__(
+        self,
+        request_interval: timedelta,
+        min_sleep: timedelta,
+        max_sleep: timedelta,
+    ) -> None:
+        """
+        :param request_interval: the interval between requests if it's not blocked.
+        :param min_sleep: the mininum, **non-ZERO** time to sleep when encountered with
+            captcha.
+        :param max_sleep: the maximum time to sleep when encountered with captcha.
+        """
+        assert min_sleep.total_seconds() != 0
+        self.request_interval = request_interval
+        self.max_sleep = max_sleep
+        self.__hub = DefaultRequestHub()
+        self.__interval = min_sleep
+
+    @override
+    def request(self, locator: AbstractUrlLocator | str) -> str:
+        try:
+            return self.__hub.request(locator)
+        except CaptchaException:
+            while self.__interval < self.max_sleep:
+                time.sleep(self.__interval.total_seconds())
+                try:
+                    content = self.__hub.request(locator)
+                    return content
+                except CaptchaException:
+                    self.__interval *= 2
+            raise RequestNotSuccessfulException(locator, "asleep forever")

@@ -7,6 +7,10 @@ Sec-Ch-Ua = '"Chromium";v="128", "Not;A=Brand";v="24", "Microsoft Edge";v="128"'
 Sec-Ch-Ua-Mobile = "?0"
 Sec-Ch-Ua-Platform = '"Windows"'
 User-Agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0"
+Cookie = "__itrace_wid=fa00235f-d3cb-42e9-2f57-e3f385208d9c; __wpkreporterwid_=e169cd36-1035-4ab7-9960-34c504162049; ali_apache_id=33.102.195.126.1726209910951.402154.0; cna=ds1qH/86IHoCATtSVAhER2sF; xlly_s=1; xman_us_f=x_l=1; t=e1104914fd45390bb829becf21fb0cb7; xman_f=qEpPyV01VjA2WfObuC3qR+dZb1RcNPBnNMB281VseWtcjBikQxVMTw5176A7Q67HsmZFmuipo8VWxLr4sXECMDUGdLwmf/TftJzwWOLhDPr5W3wN5bJCZQ==; _m_h5_tk=ec1a496859420c9ba338e4e382003add_1726402162666; _m_h5_tk_enc=c00b1a76c855c4ba0fc248570ef16092; ali_apache_track=; NWG=NNW; sc_g_cfg_f=sc_b_currency=CNY&sc_b_locale=en_US&sc_b_site=CN; buyer_ship_to_info=local_country=CN; XSRF-TOKEN=e27ec1e7-717c-4c50-88ff-2cb7f32e115f; cookie2=1254fc7a07897fe4a6ec720244ea0623; icbu_s_tag=9_11; ali_apache_tracktmp=; acs_usuc_t=acs_rt=43d6599c887d497c87f2dcbc4c1b12b6; xman_t=FPRCz3e8D1fKPmS0uBK/guW6FMsyy8RgZHC6nYFvrLj5g+lsWW9F18W2q9S7TQiQ; _samesite_flag_=true; _tb_token_=57be9d4a3ee73; tfstk=fPwjVO4x8EYf935VOhIrN0RG9GM6CP6eWhiTxlp2XxHvWCZ35oJ4QsVsXla_3dkq_79_P4SmQS5iCfaZz-u40x3_5zrOmfRVnlhTyyrqQiq9fcUzyPGGmVut5PrTggWFLoqmIA3189WUlViy4Pix6AhRXDoHHeRlnYrmIAQyfhtqCo4B8kYaBAISecixWAnx6QISbDotBqh9yQnKyA3TWVhJ2moXkE3tWTISj43tBAhRWLiOGDEf2DsMxtjz4o3Wdu2-D63CK4pOI8ibV2Ev9dpTFmGbQ_8hPZh46kc33lX6ExrQwYnUmt9SponQu4zdpLM84uUZt7bMLb47CfexihQKJfgbw-hWXdEoCqG31r_XiqF4PXm-wh6n4yu8m-F5jUEY8qMx2bWdAuhTa-c33apjpWqq35UGTQDbXSH541vERqV213GHC0gFVgOMs_wbsvFDYO_qM0mf8gsWoCcxq0gFVgOMsjnockS5VEAG.; isg=BHV1KnZdf9KpL5trueMj-uUehPEv8ikEdtBjeveaPew7zpXAv0M61GBMGJJ4jkG8; ug_se_c=organic_1726401353540"
+
+[captcha-detect]
+landmarks = ["_config_", "captcha", "punish"]
 
 [json-parser]
 landmark = "_PAGE_DATA_"

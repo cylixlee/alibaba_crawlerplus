@@ -1,3 +1,11 @@
+import json
+from datetime import timedelta
+
+from src.conf import DATA_DIR
+from src.parsers import AlibabaJsonOffersParser
+from src.requesthub import DefaultRequestHub
+
+
 def main():
     """
     Entrypoint of this program.
@@ -16,7 +24,7 @@ def main():
     """
 
     # # Temporary code to fetch contents.
-    # hub = DefaultRequestHub(timedelta(seconds=3))
+    hub = DefaultRequestHub(timedelta(seconds=3))
     # locator = AlibabaSearchUrlLocator(
     #     "Hailing",
     #     tab=AlibabaSearchTab.Suppliers,
@@ -37,18 +45,18 @@ def main():
     #     jsonobj = parser.parse(content)
     #     json.dump(jsonobj, f, indent=4)
 
-    # # Temporary code to parse offers.
-    # with open(DATA_DIR / "sample.json", encoding="utf8") as f:
-    #     jsonobj = json.load(f)
-    # parser = AlibabaJsonOffersParser()
-    # offers = parser.parse(jsonobj)
+    # Temporary code to parse offers.
+    with open(DATA_DIR / "sample.json", encoding="utf8") as f:
+        jsonobj = json.load(f)
+    parser = AlibabaJsonOffersParser()
+    offers = parser.parse(jsonobj)
     # with open(DATA_DIR / "sample-detail-urls.txt", "w", encoding="utf8") as f:
     #     f.writelines([str(offer) + "\n" for offer in offers])
 
-    # # Temporary code to fetch detail page.
-    # with open(DATA_DIR / "sample-detail.html", "w", encoding="utf8") as f:
-    #     content = hub.request(offers[0].detail_url)
-    #     f.write(content)
+    # Temporary code to fetch detail page.
+    with open(DATA_DIR / "sample-detail.html", "w", encoding="utf8") as f:
+        content = hub.request(offers[0].detail_url)
+        f.write(content)
 
 
 # Guideline recommended Main Guard
