@@ -122,19 +122,19 @@ class SleepyRequestHub(AbstractRequestHub):
         assert min_sleep.total_seconds() != 0
         self.request_interval = request_interval
         self.max_sleep = max_sleep
-        self.__hub = DefaultRequestHub()
-        self.__interval = min_sleep
+        self._hub = DefaultRequestHub()
+        self._interval = min_sleep
 
     @override
     def request(self, locator: AbstractUrlLocator | str) -> str:
         try:
-            return self.__hub.request(locator)
+            return self._hub.request(locator)
         except CaptchaException:
-            while self.__interval < self.max_sleep:
-                time.sleep(self.__interval.total_seconds())
+            while self._interval < self.max_sleep:
+                time.sleep(self._interval.total_seconds())
                 try:
-                    content = self.__hub.request(locator)
+                    content = self._hub.request(locator)
                     return content
                 except CaptchaException:
-                    self.__interval *= 2
+                    self._interval *= 2
             raise RequestNotSuccessfulException(locator, "asleep forever")

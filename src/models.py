@@ -19,3 +19,10 @@ class AlibabaCompanyOffer(object):
     name: str
     provided_products: str
     domain: str
+
+
+@dataclass
+class AlibabaCompanyDetail(AlibabaCompanyOffer):
+    city: str
+    district: str
+    bill: str
