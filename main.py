@@ -34,6 +34,7 @@ def main():
         "Hailing",
         tab=AlibabaSearchTab.Suppliers,
         country=AlibabaSupplierCountry.China,
+        page=34,
     )
     response = requests.get(
         url=locator.baseurl(),
@@ -42,16 +43,16 @@ def main():
     )
 
     if response.status_code == 200:
-        with open(DATA_DIR / "sample.html", "w", encoding="utf8") as f:
+        with open(DATA_DIR / "sample-nooffers.html", "w", encoding="utf8") as f:
             f.write(response.text)
     else:
         raise RequestNotSuccessfulException(locator)
 
     # Temporary code to parse page.
-    with open(DATA_DIR / "sample.html", encoding="utf8") as f:
+    with open(DATA_DIR / "sample-nooffers.html", encoding="utf8") as f:
         content = f.read()
     parser = AlibabaPageJsonParser()
-    with open(DATA_DIR / "sample.json", "w", encoding="utf8") as f:
+    with open(DATA_DIR / "sample-nooffers.json", "w", encoding="utf8") as f:
         jsonobj = parser.parse(content)
         json.dump(jsonobj, f, indent=4)
 

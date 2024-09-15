@@ -129,6 +129,7 @@ class AlibabaSearchUrlLocator(AbstractUrlLocator):
         *,
         tab: AlibabaSearchTab = AlibabaSearchTab.All,
         country: ItemOrIterable[AlibabaSupplierCountry] | None = None,
+        page: int | None = None,
     ) -> None:
         """
         :param search_text: The text to type into the search bar of Alibaba.
@@ -141,6 +142,7 @@ class AlibabaSearchUrlLocator(AbstractUrlLocator):
         self.search_text = search_text
         self.tab = tab
         self.country = country
+        self.page = page
 
     @override
     def baseurl(self) -> str:
@@ -161,4 +163,6 @@ class AlibabaSearchUrlLocator(AbstractUrlLocator):
                 params["country"] = countries
             else:
                 params["country"] = self.country.value
+        if self.page is not None:
+            params["page"] = self.page
         return params
