@@ -3,14 +3,12 @@ import pathlib
 import toml
 
 __all__ = [
-    # Path definitions
     "PROJECT_DIR",
-    # Configuration object
+    "DATA_DIR",
     "CONFIG",
 ]
 
-# Path definitions
 PROJECT_DIR = pathlib.Path(__file__).parent.parent.absolute()
+DATA_DIR = PROJECT_DIR / "data"
 
-# Configurations
 CONFIG = toml.load(PROJECT_DIR / "crawler-config.toml")

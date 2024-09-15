@@ -1,2 +1,14 @@
 [search]
 keywords = ["Hailing", "Gaogang", "Jiangyan", "Xinghua", "Jingjiang", "Taixing"]
+
+[disguise-headers]
+Referer = "https://onetalk.alibaba.com/"
+Sec-Ch-Ua = '"Chromium";v="128", "Not;A=Brand";v="24", "Microsoft Edge";v="128"'
+Sec-Ch-Ua-Mobile = "?0"
+Sec-Ch-Ua-Platform = '"Windows"'
+User-Agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0"
+
+[json-parser]
+landmark = "_PAGE_DATA_"
+prefix = "window._PAGE_DATA_ = {"
+suffix = "};"

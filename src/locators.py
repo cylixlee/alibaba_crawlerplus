@@ -18,25 +18,62 @@ from urllib.parse import urlencode
 from .typedefs import ItemOrIterable
 
 __all__ = [
-    "AbstractUrlProducer",
+    "AbstractUrlLocator",
     "AlibabaSearchTab",
     "AlibabaSupplierCountry",
-    "AlibabaSearchUrlProducer",
+    "AlibabaSearchUrlLocator",
 ]
 
 
-class AbstractUrlProducer(ABC):
+class AbstractUrlLocator(ABC):
     """
-    A URL producer.
+    A URL locator.
 
     Since we're writing crawlers, using URL queries are much easier and intuitive than
     using browser drivers (e.g. Selenium). We can take advantage of RESTless WebAPI to
     obtain certain pages.
     """
 
-    @classmethod
     @abstractmethod
-    def produce(cls, **kwargs) -> str: ...
+    def baseurl(self) -> str:
+        """
+        Provide a baseurl for requests.
+
+        For example, when we use Baidu to search contents about "China", with some rubbish
+        queries trimmed, the URL will be "https://www.baidu.com/s?wd=China".
+
+        Let's break it into two parts ::
+
+            baseurl = "https://www.baidu.com/s"
+            queries = {
+                "wd": "China",
+            }
+
+        :class:`AbstractUrlLocator`s' work is to form the complete URLs from ``baseurl``
+        and ``queries``. These two parts are required and cannot be absent.
+        """
+        pass
+
+    @abstractmethod
+    def params(self) -> dict:
+        """
+        Form a dictionary that can be transformed into URL queries.
+
+        For more detail, see :method:`baseurl`.
+        """
+        pass
+
+    def locate(self) -> str:
+        """
+        Produce a complete URL, with queries appended to baseurl.
+
+        This function is not necessary when using 3rd-party libraries like ``requests``.
+        :func:`request.get` automatically handles URL production and only requires baseurl
+        (to be passed as parameter ``url``) and query dictionary (to be passed as
+        parameter ``params``). In that case, just call :method:`baseurl` and
+        :method:`params` separately.
+        """
+        return self.baseurl() + "?" + urlencode(self.params())
 
 
 class AlibabaSearchTab(Enum):
@@ -45,7 +82,7 @@ class AlibabaSearchTab(Enum):
 
     When we use the search engine inside Alibaba.com, we can filter the results by
     categories. For example, we can only show the regional suppliers related to "smart
-    phones" if we specify the tab of ``AlibabaSearchUrlProducer`` as ``ggs``.
+    phones" if we specify the tab of ``AlibabaSearchUrlLocator`` as ``ggs``.
     """
 
     All = "all"
@@ -79,42 +116,49 @@ class AlibabaSupplierCountry(Enum):
     Vietnam = "VN"
 
 
-class AlibabaSearchUrlProducer(AbstractUrlProducer):
+class AlibabaSearchUrlLocator(AbstractUrlLocator):
     """
-    Producer of Alibaba's search URL.
+    Locator of Alibaba's search URL.
 
-    For more details, see :classmethod:`produce`.
+    For more details, see :classmethod:`locate`.
     """
 
-    _baseurl = "https://www.alibaba.com/trade/search"
-
-    @classmethod
-    @override
-    def produce(
-        cls,
+    def __init__(
+        self,
         search_text: str,
         *,
         tab: AlibabaSearchTab = AlibabaSearchTab.All,
         country: ItemOrIterable[AlibabaSupplierCountry] | None = None,
-    ) -> str:
+    ) -> None:
         """
-        Produces Alibaba-recognizable search URL.
-
         :param search_text: The text to type into the search bar of Alibaba.
         :param tab: The tab to display a specific kind of search results. Defaults to
             ``AlibabaSearchTab.All``.
         :param country: The country (or countries) in which the search results' suppliers
-            are located. None, one ``AlibabaSupplierCountry`` or an Iterable object of
-            that are acceptable.
+            are located. ``None``, one ``AlibabaSupplierCountry`` object or an Iterable
+            object over that are all acceptable.
+        """
+        self.search_text = search_text
+        self.tab = tab
+        self.country = country
+
+    @override
+    def baseurl(self) -> str:
+        return "https://www.alibaba.com/trade/search"
+
+    @override
+    def params(self) -> dict[str, str]:
+        """
+        Produces Alibaba-recognizable search URL queries.
         """
         params: dict[str, str] = {
-            "SearchText": search_text,
-            "tab": tab.value,
+            "SearchText": self.search_text,
+            "tab": self.tab.value,
         }
-        if country is not None:
-            if isinstance(country, Iterable):
-                countries = ",".join([c.value for c in country])
+        if self.country is not None:
+            if isinstance(self.country, Iterable):
+                countries = ",".join([c.value for c in self.country])
                 params["country"] = countries
             else:
-                params["country"] = country.value
-        return __class__._baseurl + "?" + urlencode(params)
+                params["country"] = self.country.value
+        return params

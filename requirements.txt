@@ -518,6 +518,9 @@ soupsieve==2.6 ; python_version >= "3.12" and python_version < "4.0" \
 tldextract==5.1.2 ; python_version >= "3.12" and python_version < "4.0" \
     --hash=sha256:4dfc4c277b6b97fa053899fcdb892d2dc27295851ab5fac4e07797b6a21b2e46 \
     --hash=sha256:c9e17f756f05afb5abac04fe8f766e7e70f9fe387adb1859f0f52408ee060200
+toml==0.10.2 ; python_version >= "3.12" and python_version < "4.0" \
+    --hash=sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b \
+    --hash=sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f
 twisted==24.7.0 ; python_version >= "3.12" and python_version < "4.0" \
     --hash=sha256:5a60147f044187a127ec7da96d170d49bcce50c6fd36f594e60f4587eff4d394 \
     --hash=sha256:734832ef98108136e222b5230075b1079dad8a3fc5637319615619a7725b0c81
