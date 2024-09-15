@@ -122,3 +122,14 @@ class AlibabaJsonOffersParser(AbstractDataParser):
                 )
             )
         return offers
+
+
+# TODO: implement the detail page parser.
+#
+# The detail page is on captcha now.
+class AlibabaDetailPageParser(AbstractDataParser):
+    @override
+    def parse(self, data: bytes | str) -> object:
+        if isinstance(data, bytes):
+            data = data.decode()
+        raise NotImplementedError()

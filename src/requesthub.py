@@ -51,7 +51,7 @@ class DefaultRequestHub(AbstractRequestHub):
         self.last_request_time = datetime.now()
 
     @override
-    def request(self, locator: AbstractUrlLocator) -> str:
+    def request(self, locator: AbstractUrlLocator | str) -> str:
         """
         Sends a request to the specified URL. The configured ``disguise-headers`` are used
         as request headers.
@@ -66,15 +66,19 @@ class DefaultRequestHub(AbstractRequestHub):
         now = datetime.now()
         if now < next_request_time:
             interval = next_request_time - now
-            time.sleep(interval.seconds + 1)  # incase the interval is 0.99999s
+            time.sleep(interval.seconds + 1)  # in case the interval is 0.99999s
         self.last_request_time = datetime.now()
 
         # send request through requests library
-        response = requests.get(
-            locator.baseurl(),
-            locator.params(),
-            headers=CONFIG["disguise-headers"],
-        )
+        if isinstance(locator, AbstractUrlLocator):
+            response = requests.get(
+                locator.baseurl(),
+                locator.params(),
+                headers=CONFIG["disguise-headers"],
+            )
+        else:
+            response = requests.get(url=locator)
+
         if response.status_code != 200:
             raise RequestNotSuccessfulException(locator)
         return response.text

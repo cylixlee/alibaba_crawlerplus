@@ -74,6 +74,9 @@ class AbstractUrlLocator(ABC):
         """
         return self.baseurl() + "?" + urlencode(self.params())
 
+    def __str__(self) -> str:
+        return self.locate()
+
 
 class AlibabaSearchTab(Enum):
     """

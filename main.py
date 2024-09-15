@@ -1,9 +1,3 @@
-import json
-
-from src.conf import DATA_DIR
-from src.parsers import AlibabaJsonOffersParser
-
-
 def main():
     """
     Entrypoint of this program.
@@ -22,23 +16,18 @@ def main():
     """
 
     # # Temporary code to fetch contents.
+    # hub = DefaultRequestHub(timedelta(seconds=3))
     # locator = AlibabaSearchUrlLocator(
     #     "Hailing",
     #     tab=AlibabaSearchTab.Suppliers,
     #     country=AlibabaSupplierCountry.China,
-    #     page=34,
+    #     page=33,
     # )
-    # response = requests.get(
-    #     url=locator.baseurl(),
-    #     params=locator.params(),
-    #     headers=CONFIG["disguise-headers"],
-    # )
+    # print(locator.locate())
+    # content = hub.request(locator)
 
-    # if response.status_code == 200:
-    #     with open(DATA_DIR / "sample-nooffers.html", "w", encoding="utf8") as f:
-    #         f.write(response.text)
-    # else:
-    #     raise RequestNotSuccessfulException(locator)
+    # with open(DATA_DIR / "sample-nooffers.html", "w", encoding="utf8") as f:
+    #     f.write(content)
 
     # # Temporary code to parse page.
     # with open(DATA_DIR / "sample-nooffers.html", encoding="utf8") as f:
@@ -48,13 +37,18 @@ def main():
     #     jsonobj = parser.parse(content)
     #     json.dump(jsonobj, f, indent=4)
 
-    # Temporary code to parse offers.
-    with open(DATA_DIR / "sample.json", encoding="utf8") as f:
-        jsonobj = json.load(f)
-    parser = AlibabaJsonOffersParser()
-    offers = parser.parse(jsonobj)
-    for offer in offers:
-        print(offer)
+    # # Temporary code to parse offers.
+    # with open(DATA_DIR / "sample.json", encoding="utf8") as f:
+    #     jsonobj = json.load(f)
+    # parser = AlibabaJsonOffersParser()
+    # offers = parser.parse(jsonobj)
+    # with open(DATA_DIR / "sample-detail-urls.txt", "w", encoding="utf8") as f:
+    #     f.writelines([str(offer) + "\n" for offer in offers])
+
+    # # Temporary code to fetch detail page.
+    # with open(DATA_DIR / "sample-detail.html", "w", encoding="utf8") as f:
+    #     content = hub.request(offers[0].detail_url)
+    #     f.write(content)
 
 
 # Guideline recommended Main Guard
