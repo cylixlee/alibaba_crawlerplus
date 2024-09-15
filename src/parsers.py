@@ -1,25 +1,38 @@
+"""
+Extractors of raw data.
+
+This module is the core functionality of a crawler. We get raw page data from the server,
+as the browser does; but we process the website data into structured form, instead of
+rendering them into beautiful UIs.
+
+For each page, or even the same page after a while, there may be a specific parser to
+crawl all the data out.
+"""
+
 import json
 from abc import ABC, abstractmethod
 from typing import override
 
 from bs4 import BeautifulSoup, PageElement, ResultSet
 
-from src.conf import CONFIG
-from src.exceptions import ElementNotFoundException
+from .conf import CONFIG
+from .exceptions import ElementNotFoundException
+from .models import AlibabaCompanyOffer
 
 __all__ = [
-    "AbstractPageParser",
+    "AbstractDataParser",
     "AlibabaPageJsonParser",
+    "AlibabaJsonOffersParser",
 ]
 
 
-class AbstractPageParser(ABC):
+class AbstractDataParser(ABC):
     """
-    A parser of a certain page.
+    A parser of a certain type of data.
 
-    This is the core functionality of a crawler: parsing useful data from a lot of page
-    source and returns as objects. As for different pages, we shall adopt different
-    parsers, which implements a common interface.
+    This is the core functionality of a crawler: parsing useful parts from a lot of raw
+    data and returns as objects. As for different types of data, we shall adopt different
+    parsers, which implements the common interface.
     """
 
     @abstractmethod
@@ -27,9 +40,9 @@ class AbstractPageParser(ABC):
         pass
 
 
-class AlibabaPageJsonParser(AbstractPageParser):
+class AlibabaPageJsonParser(AbstractDataParser):
     """
-    Parse Alibaba data from JSON.
+    Parse JSON from Alibaba search page.
 
     As the legacy code does, we try to extract JSON data from one of the requested HTML's
     script. This is much easier and intuitive than using XPath or Selenium to find
@@ -37,10 +50,12 @@ class AlibabaPageJsonParser(AbstractPageParser):
 
     WARNING: This technique relies on the JSON data, which is more unstable than page
     elements. Please re-check the JSON data when this is not working.
+
+    NOTE: This class is named PageJsonParser, is because it parses JSON from a page.
     """
 
     @override
-    def parse(self, data: bytes | str) -> object:
+    def parse(self, data: bytes | str) -> dict:
         # create html parser
         if isinstance(data, bytes):
             data = data.decode()
@@ -66,3 +81,44 @@ class AlibabaPageJsonParser(AbstractPageParser):
         jsonstr = f"{{{desired_script.text[start:end]}}}"
 
         return json.loads(jsonstr)
+
+
+class AlibabaJsonOffersParser(AbstractDataParser):
+    """
+    Parse offer data from JSON.
+
+    Offers, according to the legacy code, is an important item of page JSON data that we
+    rely on. It contains company name, ID, management time and more data accessible from
+    company detail pages' URL.
+
+    NOTE: This class is named JsonOffersParser, is because it parses offers from JSON.
+    """
+
+    @override
+    def parse(self, jsonobj: dict) -> list[AlibabaCompanyOffer]:
+        template = CONFIG["json-parser"]["offer-template"]
+        offers = []
+
+        # retrieve the offer list JSON
+        offerlist = jsonobj
+        for path in CONFIG["json-parser"]["offer-list-path"]:
+            offerlist = offerlist[path]
+
+        # iterate over JSON list and parse `AlibabaCompanyOffer`s out.
+        for offer in offerlist:
+            detail_url: str = "https:" + offer[template["detail-url"]]
+            name = offer[template["name"]]
+            provided_products = offer[template["provided-products"]]
+            # parse domain out
+            domain = detail_url.split(".en")[0].split("//")[1]
+
+            # append offer object
+            offers.append(
+                AlibabaCompanyOffer(
+                    detail_url=detail_url,
+                    name=name,
+                    provided_products=provided_products,
+                    domain=domain,
+                )
+            )
+        return offers

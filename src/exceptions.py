@@ -1,4 +1,12 @@
-from src.locators import AbstractUrlLocator
+"""
+All possible exceptions the crawler may raise on its own initiative.
+
+Despite the exceptions that may be raised by the standard libraries of Python and
+3rd-party libraries, the crawler raises some when encountered with problems. All new
+exceptions should be defined here intensively.
+"""
+
+from .locators import AbstractUrlLocator
 
 __all__ = ["ElementNotFoundException", "RequestNotSuccessfulException"]
 

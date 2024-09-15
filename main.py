@@ -1,15 +1,7 @@
 import json
 
-import requests
-
-from src.conf import CONFIG, DATA_DIR
-from src.exceptions import RequestNotSuccessfulException
-from src.locators import (
-    AlibabaSearchTab,
-    AlibabaSearchUrlLocator,
-    AlibabaSupplierCountry,
-)
-from src.parsers import AlibabaPageJsonParser
+from src.conf import DATA_DIR
+from src.parsers import AlibabaJsonOffersParser
 
 
 def main():
@@ -29,32 +21,40 @@ def main():
     arguments should be written in configuration files.
     """
 
-    # Temporary code to fetch contents.
-    locator = AlibabaSearchUrlLocator(
-        "Hailing",
-        tab=AlibabaSearchTab.Suppliers,
-        country=AlibabaSupplierCountry.China,
-        page=34,
-    )
-    response = requests.get(
-        url=locator.baseurl(),
-        params=locator.params(),
-        headers=CONFIG["disguise-headers"],
-    )
+    # # Temporary code to fetch contents.
+    # locator = AlibabaSearchUrlLocator(
+    #     "Hailing",
+    #     tab=AlibabaSearchTab.Suppliers,
+    #     country=AlibabaSupplierCountry.China,
+    #     page=34,
+    # )
+    # response = requests.get(
+    #     url=locator.baseurl(),
+    #     params=locator.params(),
+    #     headers=CONFIG["disguise-headers"],
+    # )
 
-    if response.status_code == 200:
-        with open(DATA_DIR / "sample-nooffers.html", "w", encoding="utf8") as f:
-            f.write(response.text)
-    else:
-        raise RequestNotSuccessfulException(locator)
+    # if response.status_code == 200:
+    #     with open(DATA_DIR / "sample-nooffers.html", "w", encoding="utf8") as f:
+    #         f.write(response.text)
+    # else:
+    #     raise RequestNotSuccessfulException(locator)
 
-    # Temporary code to parse page.
-    with open(DATA_DIR / "sample-nooffers.html", encoding="utf8") as f:
-        content = f.read()
-    parser = AlibabaPageJsonParser()
-    with open(DATA_DIR / "sample-nooffers.json", "w", encoding="utf8") as f:
-        jsonobj = parser.parse(content)
-        json.dump(jsonobj, f, indent=4)
+    # # Temporary code to parse page.
+    # with open(DATA_DIR / "sample-nooffers.html", encoding="utf8") as f:
+    #     content = f.read()
+    # parser = AlibabaPageJsonParser()
+    # with open(DATA_DIR / "sample-nooffers.json", "w", encoding="utf8") as f:
+    #     jsonobj = parser.parse(content)
+    #     json.dump(jsonobj, f, indent=4)
+
+    # Temporary code to parse offers.
+    with open(DATA_DIR / "sample.json", encoding="utf8") as f:
+        jsonobj = json.load(f)
+    parser = AlibabaJsonOffersParser()
+    offers = parser.parse(jsonobj)
+    for offer in offers:
+        print(offer)
 
 
 # Guideline recommended Main Guard

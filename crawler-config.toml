@@ -12,3 +12,9 @@ User-Agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 landmark = "_PAGE_DATA_"
 prefix = "window._PAGE_DATA_ = {"
 suffix = "};"
+offer-list-path = ["offerResultData", "offerList"]
+
+[json-parser.offer-template]
+detail-url = "action"
+name = "companyName"
+provided-products = "provideProducts"
