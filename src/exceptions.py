@@ -6,7 +6,7 @@ Despite the exceptions that may be raised by the standard libraries of Python an
 exceptions should be defined here intensively.
 """
 
-from .locators import AbstractUrlLocator
+from .urls import AbstractUrl
 
 __all__ = [
     "ElementNotFoundException",
@@ -41,12 +41,12 @@ class RequestNotSuccessfulException(Exception):
     Indicates a request to a specific URL is not successful.
     """
 
-    def __init__(self, locator: AbstractUrlLocator, reason: str | None = None) -> None:
-        self.locator = locator
+    def __init__(self, url: AbstractUrl, reason: str | None = None) -> None:
+        self.url = url
         self.reason = reason
 
     def __str__(self) -> str:
-        message = f"request of URL {self.locator.locate()} is not successful"
+        message = f"request of URL {self.url} is not successful"
         if self.reason is not None:
             return f"{message}: {self.reason}"
         return message
@@ -59,8 +59,8 @@ class CaptchaException(Exception):
     As for now, we cannot bypass the captcha.
     """
 
-    def __init__(self, locator: AbstractUrlLocator | str) -> None:
-        self.locator = locator
+    def __init__(self, url: AbstractUrl | str) -> None:
+        self.url = url
 
     def __str__(self) -> str:
-        return f"captcha! request of {str(self.locator)} is blocked."
+        return f"captcha! request of {str(self.url)} is blocked."

@@ -1,0 +1,42 @@
+administrative-area:
+  address: "jiangsu"
+  name: "江苏省"
+  children:
+    - address: "taizhou"
+      name: "泰州市"
+      children:
+        - { address: "suqian", name: "经济开发区" }
+        - { address: "economic", name: "经济开发区" }
+        - { address: "hailing", name: "海陵区" }
+        - { address: "gaogang", name: "高港区" }
+        - { address: "jiangyan", name: "姜堰区" }
+        - { address: "xinghua", name: "兴化市" }
+        - { address: "jingjiang", name: "靖江市" }
+        - { address: "taixing", name: "泰兴市" }
+
+disguise-headers:
+  Referer: "https://onetalk.alibaba.com/"
+  Sec-Ch-Ua: '"Chromium";v="128", "Not;A=Brand";v="24", "Microsoft Edge";v="128"'
+  Sec-Ch-Ua-Mobile: "?0"
+  Sec-Ch-Ua-Platform: '"Windows"'
+  User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0"
+
+captcha-detect:
+  landmarks: ["_config_", "captcha", "punish"]
+
+json-parser:
+  landmark: "_PAGE_DATA_"
+  prefix: "window._PAGE_DATA_ = {"
+  suffix: "};"
+  offer-list-path: ["offerResultData", "offerList"]
+  offer-template:
+    detail-url: "action"
+    name: "companyName"
+    provided-products: "provideProducts"
+
+xpath:
+  bill:
+    - '//*[@id="8919138051"]/div/div/div/div[3]/div/table/tr[3]/td[2]/div/div/div'
+    - '//*[@id="8945312245"]/div/div[2]/div[1]/ul/li[3]/strong'
+  address:
+    - '//*[@id="8919138051"]/div/div/div/div[3]/div/table/tr[1]/td[4]/div/div/div'

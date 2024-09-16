@@ -1,9 +1,4 @@
-import json
-from datetime import timedelta
-
-from src.conf import DATA_DIR
-from src.parsers import AlibabaJsonOffersParser
-from src.requesthub import DefaultRequestHub
+from src.addressing import administrative_address_of
 
 
 def main():
@@ -24,15 +19,15 @@ def main():
     """
 
     # # Temporary code to fetch contents.
-    hub = DefaultRequestHub(timedelta(seconds=3))
-    # locator = AlibabaSearchUrlLocator(
+    # hub = DefaultRequestHub(timedelta(seconds=3))
+    # url = AlibabaSearchUrl(
     #     "Hailing",
     #     tab=AlibabaSearchTab.Suppliers,
     #     country=AlibabaSupplierCountry.China,
     #     page=33,
     # )
-    # print(locator.locate())
-    # content = hub.request(locator)
+    # print(url)
+    # content = hub.request(url)
 
     # with open(DATA_DIR / "sample-nooffers.html", "w", encoding="utf8") as f:
     #     f.write(content)
@@ -45,18 +40,23 @@ def main():
     #     jsonobj = parser.parse(content)
     #     json.dump(jsonobj, f, indent=4)
 
-    # Temporary code to parse offers.
-    with open(DATA_DIR / "sample.json", encoding="utf8") as f:
-        jsonobj = json.load(f)
-    parser = AlibabaJsonOffersParser()
-    offers = parser.parse(jsonobj)
+    # # Temporary code to parse offers.
+    # with open(DATA_DIR / "sample.json", encoding="utf8") as f:
+    #     jsonobj = json.load(f)
+    # parser = AlibabaJsonOffersParser()
+    # offers = parser.parse(jsonobj)
     # with open(DATA_DIR / "sample-detail-urls.txt", "w", encoding="utf8") as f:
     #     f.writelines([str(offer) + "\n" for offer in offers])
 
-    # Temporary code to fetch detail page.
-    with open(DATA_DIR / "sample-detail.html", "w", encoding="utf8") as f:
-        content = hub.request(offers[0].detail_url)
-        f.write(content)
+    # # Temporary code to fetch detail page.
+    # with open(DATA_DIR / "sample-detail.html", "w", encoding="utf8") as f:
+    #     content = hub.request(offers[0].detail_url)
+    #     f.write(content)
+
+    # Temporary code to test addressing.
+    print(
+        administrative_address_of("Taizhou Gaogang District Miaorun Trading Co., Ltd")
+    )
 
 
 # Guideline recommended Main Guard

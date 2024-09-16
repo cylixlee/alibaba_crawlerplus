@@ -15,12 +15,12 @@ from typing import override
 import requests
 from bs4 import BeautifulSoup, PageElement, ResultSet
 
-from .conf import CONFIG
+from .configuration import CONFIG
 from .exceptions import CaptchaException, RequestNotSuccessfulException
-from .locators import AbstractUrlLocator
+from .urls import AbstractUrl
 
 
-def _captcha_blocked(source: str) -> bool:
+def __captcha_blocked(source: str) -> bool:
     for landmark in CONFIG["captcha-detect"]["landmarks"]:
         if landmark not in source:
             return False
@@ -58,12 +58,13 @@ class DefaultRequestHub(AbstractRequestHub):
         self.last_request_time = datetime.now()
 
     @override
-    def request(self, locator: AbstractUrlLocator | str) -> str:
+    def request(self, url: AbstractUrl | str) -> str:
         """
         Sends a request to the specified URL. The configured ``disguise-headers`` are used
         as request headers.
 
-        :param locator: an instance of :class:`AbstractUrlLocator` to locate the URL.
+        :param url: an instance of :class:`AbstractUrl`, or str representing the URL to
+            send a GET request.
         :returns: a str of the response text.
         """
 
@@ -77,24 +78,24 @@ class DefaultRequestHub(AbstractRequestHub):
         self.last_request_time = datetime.now()
 
         # send request through requests library
-        if isinstance(locator, AbstractUrlLocator):
+        if isinstance(url, AbstractUrl):
             response = requests.get(
-                locator.baseurl(),
-                locator.params(),
+                url.baseurl(),
+                url.params(),
                 headers=CONFIG["disguise-headers"],
             )
         else:
-            response = requests.get(url=locator)
+            response = requests.get(url=url)
 
         if response.status_code != 200:
-            raise RequestNotSuccessfulException(locator)
+            raise RequestNotSuccessfulException(url)
 
         # captcha detection
         html = BeautifulSoup(response.text, "html.parser")
         scripts: ResultSet[PageElement] = html.find_all("script")
         for script in scripts:
-            if _captcha_blocked(script.text):
-                raise CaptchaException(locator)
+            if __captcha_blocked(script.text):
+                raise CaptchaException(url)
         return response.text
 
 
@@ -122,19 +123,19 @@ class SleepyRequestHub(AbstractRequestHub):
         assert min_sleep.total_seconds() != 0
         self.request_interval = request_interval
         self.max_sleep = max_sleep
-        self._hub = DefaultRequestHub()
-        self._interval = min_sleep
+        self.__hub = DefaultRequestHub()
+        self.__interval = min_sleep
 
     @override
-    def request(self, locator: AbstractUrlLocator | str) -> str:
+    def request(self, url: AbstractUrl | str) -> str:
         try:
-            return self._hub.request(locator)
+            return self.__hub.request(url)
         except CaptchaException:
-            while self._interval < self.max_sleep:
-                time.sleep(self._interval.total_seconds())
+            while self.__interval < self.max_sleep:
+                time.sleep(self.__interval.total_seconds())
                 try:
-                    content = self._hub.request(locator)
+                    content = self.__hub.request(url)
                     return content
                 except CaptchaException:
-                    self._interval *= 2
-            raise RequestNotSuccessfulException(locator, "asleep forever")
+                    self.__interval *= 2
+            raise RequestNotSuccessfulException(url, "asleep forever")

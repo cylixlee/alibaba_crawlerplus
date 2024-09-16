@@ -17,16 +17,16 @@ from urllib.parse import urlencode
 from .typedefs import ItemOrIterable
 
 __all__ = [
-    "AbstractUrlLocator",
+    "AbstractUrl",
     "AlibabaSearchTab",
     "AlibabaSupplierCountry",
-    "AlibabaSearchUrlLocator",
+    "AlibabaSearchUrl",
 ]
 
 
-class AbstractUrlLocator(ABC):
+class AbstractUrl(ABC):
     """
-    A URL locator.
+    A URL object.
 
     Since we're writing crawlers, using URL queries are much easier and intuitive than
     using browser drivers (e.g. Selenium). We can take advantage of RESTless WebAPI to
@@ -48,8 +48,8 @@ class AbstractUrlLocator(ABC):
                 "wd": "China",
             }
 
-        :class:`AbstractUrlLocator`s' work is to form the complete URLs from ``baseurl``
-        and ``queries``. These two parts are required and cannot be absent.
+        :class:`AbstractUrl`s' work is to form the complete URLs from ``baseurl`` and
+        ``queries``. These two parts are required and cannot be absent.
         """
         pass
 
@@ -62,7 +62,7 @@ class AbstractUrlLocator(ABC):
         """
         pass
 
-    def locate(self) -> str:
+    def __str__(self) -> str:
         """
         Produce a complete URL, with queries appended to baseurl.
 
@@ -74,9 +74,6 @@ class AbstractUrlLocator(ABC):
         """
         return self.baseurl() + "?" + urlencode(self.params())
 
-    def __str__(self) -> str:
-        return self.locate()
-
 
 class AlibabaSearchTab(Enum):
     """
@@ -84,7 +81,7 @@ class AlibabaSearchTab(Enum):
 
     When we use the search engine inside Alibaba.com, we can filter the results by
     categories. For example, we can only show the regional suppliers related to "smart
-    phones" if we specify the tab of ``AlibabaSearchUrlLocator`` as ``ggs``.
+    phones" if we specify the tab of :class:`AlibabaSearchUrl` as ``ggs``.
     """
 
     All = "all"
@@ -118,11 +115,9 @@ class AlibabaSupplierCountry(Enum):
     Vietnam = "VN"
 
 
-class AlibabaSearchUrlLocator(AbstractUrlLocator):
+class AlibabaSearchUrl(AbstractUrl):
     """
-    Locator of Alibaba's search URL.
-
-    For more details, see :classmethod:`locate`.
+    Object representing Alibaba's search URL.
     """
 
     def __init__(

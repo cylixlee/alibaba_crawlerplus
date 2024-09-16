@@ -14,10 +14,11 @@ from abc import ABC, abstractmethod
 from typing import override
 
 from bs4 import BeautifulSoup, PageElement, ResultSet
+from lxml.etree import _Element
 
-from .conf import CONFIG
+from .configuration import CONFIG
+from .datamodels import AlibabaCompanyDetail, AlibabaCompanyOffer
 from .exceptions import ElementNotFoundException
-from .models import AlibabaCompanyOffer
 
 __all__ = [
     "AbstractDataParser",
@@ -106,19 +107,51 @@ class AlibabaJsonOffersParser(AbstractDataParser):
 
         # iterate over JSON list and parse `AlibabaCompanyOffer`s out.
         for offer in offerlist:
-            detail_url: str = "https:" + offer[template["detail-url"]]
-            name = offer[template["name"]]
-            provided_products = offer[template["provided-products"]]
-            # parse domain out
-            domain = detail_url.split(".en")[0].split("//")[1]
-
-            # append offer object
-            offers.append(
-                AlibabaCompanyOffer(
-                    detail_url=detail_url,
-                    name=name,
-                    provided_products=provided_products,
-                    domain=domain,
-                )
+            # detail url need to be added with "https" scheme
+            detail_url = "https:" + offer[template["detail-url"]]
+            obj = AlibabaCompanyOffer(
+                detail_url=detail_url,
+                name=offer[template["name"]],
+                provided_products=offer[template["provided-products"]],
+                # domain need to be parsed out
+                domain=detail_url.split(".en")[0].split("//")[1],
             )
+            # append offer object
+            offers.append(obj)
         return offers
+
+
+def __content_of(html: _Element, xpaths: list[str]) -> str:
+    for xpath in xpaths:
+        elements: list[_Element] = html.xpath(xpath)
+        if elements is not None and len(elements) > 0:
+            return elements[0].text
+    return ""
+
+
+class AlibabaXpathCompanyParser(AbstractDataParser):
+    @override
+    def parse(
+        self,
+        offer: AlibabaCompanyOffer,
+        data: bytes | str,
+    ) -> AlibabaCompanyDetail:
+        # # create LXML parser
+        # if isinstance(data, bytes):
+        #     data = data.decode()
+        # html = HTML(data)
+
+        # # parse elements
+        # bill = __content_of(CONFIG["xpath"]["bill"])
+        # address = __content_of(CONFIG["xpath"]["address"])
+
+        # city: str = ""
+        # district: str = ""
+
+        # return AlibabaCompanyDetail(
+        #     city=city,
+        #     district=district,
+        #     bill=bill,
+        #     **asdict(offer),
+        # )
+        raise NotImplementedError()

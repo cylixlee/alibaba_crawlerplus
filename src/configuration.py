@@ -10,7 +10,7 @@ paths in Python is hard to manage), and the unique CONFIG variable loaded from T
 
 import pathlib
 
-import toml
+import yaml
 
 __all__ = [
     "PROJECT_DIR",
@@ -18,7 +18,13 @@ __all__ = [
     "CONFIG",
 ]
 
+
+def __load_config(path: pathlib.Path):
+    with open(path, encoding="utf8") as f:
+        return yaml.load(f, Loader=yaml.Loader)
+
+
 PROJECT_DIR = pathlib.Path(__file__).parent.parent.absolute()
 DATA_DIR = PROJECT_DIR / "data"
 
-CONFIG = toml.load(PROJECT_DIR / "crawler-config.toml")
+CONFIG = __load_config(PROJECT_DIR / "crawler-config.yaml")
