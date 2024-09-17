@@ -101,7 +101,7 @@ class AlibabaJsonOffersParser(AbstractDataParser):
 def _content_of(html: _Element, xpaths: list[str]) -> str:
     for xpath in xpaths:
         elements: list[_Element] = html.xpath(xpath)
-        if elements is not None and len(elements) > 0:
+        if elements:
             return elements[0].text
     return ""
 

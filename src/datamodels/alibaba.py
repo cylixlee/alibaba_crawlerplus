@@ -13,5 +13,5 @@ class AlibabaCompanyOffer(object):
 
 @dataclass
 class AlibabaCompanyDetail(AlibabaCompanyOffer):
-    administrative_address: list[str]
+    administrative_address: list[str] | None
     bill: str

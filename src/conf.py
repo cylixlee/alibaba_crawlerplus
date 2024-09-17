@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-def _load_config(path: pathlib.Path):
+def _load_config(path: pathlib.Path) -> None:
     with open(path, encoding="utf8") as f:
         return yaml.load(f, Loader=yaml.Loader)
 

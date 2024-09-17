@@ -10,11 +10,17 @@ state", which is the minimal unit to recover from storage. For more information,
 :class:`AbstractResumableState`.
 """
 
+import pathlib
+import pickle
 from abc import ABC, abstractmethod
 from functools import wraps
-from typing import Self
+from typing import Self, override
 
-__all__ = ["AbstractResumableState", "resumable"]
+__all__ = [
+    "AbstractResumableState",
+    "transaction",
+    "DefaultResumableState",
+]
 
 
 class AbstractResumableState(ABC):
@@ -28,7 +34,7 @@ class AbstractResumableState(ABC):
 
     @classmethod
     @abstractmethod
-    def load(cls) -> Self | None:
+    def load(cls, *args, **kwargs) -> Self:
         """
         Load the state from somewhere.
 
@@ -48,18 +54,46 @@ class AbstractResumableState(ABC):
         pass
 
 
-def resumable(method):
+def transaction(method):
     """
-    Declare a method of subclass derived from :class:`AbstractResumableState` is
-    resumable.
+    Declare a method of subclass derived from :class:`AbstractResumableState` is a
+    transaction.
 
-    In the current implementation, this turns the wrapped method a transaction: every time
-    the method is called, the :method:`store` is called once to sync the state locally.
+    In the current implementation, transaction is resumable: every time the method is
+    called, the :method:`store` is called once to sync the state locally.
     """
 
     @wraps(method)
-    def transaction(self: AbstractResumableState, *args, **kwargs):
-        method(self, *args, **kwargs)
+    def action(self: AbstractResumableState, *args, **kwargs):
+        result = method(self, *args, **kwargs)
         self.store()
+        return result
 
-    return transaction
+    return action
+
+
+class DefaultResumableState(AbstractResumableState):
+    """
+    The default implementation of a resumable state.
+
+    Currently, this class uses :module:`pickle` to load and store its instances from and
+    to binary files. It's the simplest and crudest way to cache data -- the whole Python
+    object is cached.
+
+    The modern object-oriented path-operation module :module:`pathlib` in stdlib is
+    adopted.
+    """
+
+    def __init__(self, path: pathlib.Path) -> None:
+        self._cache_path = path
+
+    @classmethod
+    @override
+    def load(cls, path: pathlib.Path) -> Self:
+        with open(path, "rb") as f:
+            return pickle.load(f)
+
+    @override
+    def store(self) -> None:
+        with open(self._cache_path, "wb") as f:
+            pickle.dump(self, f)

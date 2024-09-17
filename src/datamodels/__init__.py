@@ -8,5 +8,5 @@ classes of the parsed data.
 Data models are defined as dataclasses.
 """
 
-from .addressing import *  # noqa: F403
+from .address import *  # noqa: F403
 from .alibaba import *  # noqa: F403

@@ -1,11 +1,35 @@
-from src.misc.resuming import AbstractResumableState
+import pathlib
+
+from src.datamodels import AdministrativeArea, AlibabaCompanyOffer
+from src.misc.addressing import administrative_units
+from src.misc.resuming import DefaultResumableState, transaction
+
+type OffersCrawlerResult = dict[AdministrativeArea, list[AlibabaCompanyOffer]]
 
 
-class OfferCrawlerRoutine(AbstractResumableState):
-    pass
+class OffersCrawler(DefaultResumableState):
+    def __init__(self, path: pathlib.Path) -> None:
+        super().__init__(path)
+        self._offers: OffersCrawlerResult = {}
+
+    def crawl(self) -> OffersCrawlerResult:
+        for unit in administrative_units():
+            # (kind of) Integrity check.
+            #
+            # If all units are crawled and cached, this function simply returns the
+            # result; otherwise, incremental crawling is performed.
+            #
+            # This saves a lot of duplicate work and makes this task resumable.
+            if unit not in self._offers.keys():
+                self._crawl_area(unit)
+        return self._offers
+
+    @transaction
+    def _crawl_area(self, area: AdministrativeArea) -> None:
+        pass
 
 
-def main():
+def main() -> None:
     """
     Entrypoint of this program.
 

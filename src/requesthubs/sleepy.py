@@ -37,7 +37,7 @@ class SleepyRequestHub(AbstractRequestHub):
         self._hub = DefaultRequestHub()
         self._interval = min_sleep
 
-    def sleep(self):
+    def sleep(self) -> None:
         seconds = self._interval.total_seconds()
         print(f"captcha detected. sleeping for {seconds}s...")
         time.sleep(seconds)
