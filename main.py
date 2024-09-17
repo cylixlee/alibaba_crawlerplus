@@ -1,13 +1,8 @@
-import pprint
+from src.misc.resuming import AbstractResumableState
 
-from src.configuration import DATA_DIR
-from src.datamodels import AlibabaCompanyOffer
-from src.parsers import (
-    AlibabaJsonOffersParser,
-    AlibabaPageJsonParser,
-    AlibabaXpathCompanyParser,
-    ComposeParser,
-)
+
+class OfferCrawlerRoutine(AbstractResumableState):
+    pass
 
 
 def main():
@@ -26,19 +21,6 @@ def main():
     Additionally, the `main()` function should not receive any arguments. Startup
     arguments should be written in configuration files.
     """
-    with open(DATA_DIR / "sample.html", encoding="utf8") as f:
-        data = f.read()
-        parser = ComposeParser(
-            AlibabaPageJsonParser(),
-            AlibabaJsonOffersParser(),
-        )
-        offers: list[AlibabaCompanyOffer] = parser.parse(data)
-
-    with open(DATA_DIR / "sample-detail.html", encoding="utf8") as f:
-        data = f.read()
-        parser = AlibabaXpathCompanyParser()
-        detail = parser.parse(offers[0], data)
-        pprint.pp(detail)
 
 
 # Guideline recommended Main Guard

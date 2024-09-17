@@ -8,8 +8,13 @@ Conventionally, the dataclass :class:`AdministrativeArea` is defined in
 :module:`datamodels` module, not here.
 """
 
-from .configuration import CONFIG
-from .datamodels import AdministrativeArea
+from ..conf import CONFIG
+from ..datamodels import AdministrativeArea
+
+__all__ = [
+    "administrative_areas",
+    "administrative_address_of",
+]
 
 __administrative_area: list[AdministrativeArea] | None = None
 

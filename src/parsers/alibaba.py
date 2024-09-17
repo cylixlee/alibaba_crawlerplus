@@ -1,68 +1,21 @@
-"""
-Extractors of raw data.
-
-This module is the core functionality of a crawler. We get raw page data from the server,
-as the browser does; but we process the website data into structured form, instead of
-rendering them into beautiful UIs.
-
-For each page, or even the same page after a while, there may be a specific parser to
-crawl all the data out.
-"""
-
 import json
-from abc import ABC, abstractmethod
 from dataclasses import asdict
 from typing import override
 
 from bs4 import BeautifulSoup, PageElement, ResultSet
 from lxml.etree import HTML, _Element
 
-from .addressing import administrative_address_of
-from .configuration import CONFIG
-from .datamodels import AlibabaCompanyDetail, AlibabaCompanyOffer
-from .exceptions import ElementNotFoundException
+from ..conf import CONFIG
+from ..datamodels import AlibabaCompanyDetail, AlibabaCompanyOffer
+from ..exceptions import ElementNotFoundException
+from ..misc.addressing import administrative_address_of
+from .abstract import AbstractDataParser
 
 __all__ = [
-    "AbstractDataParser",
-    "ComposeParser",
     "AlibabaPageJsonParser",
     "AlibabaJsonOffersParser",
+    "AlibabaXpathCompanyParser",
 ]
-
-
-class AbstractDataParser(ABC):
-    """
-    A parser of a certain type of data.
-
-    This is the core functionality of a crawler: parsing useful parts from a lot of raw
-    data and returns as objects. As for different types of data, we shall adopt different
-    parsers, which implements the common interface.
-    """
-
-    @abstractmethod
-    def parse(self, *args, **kwargs) -> object:
-        pass
-
-
-class ComposeParser(AbstractDataParser):
-    """
-    A utility parser that compose several parsers.
-
-    For example, if the parser is composed of two parsers: :class:`AlibabaPageJsonParser`
-    and :class:`AlibabaJsonOffersParser`, then it parses json from the argument (through
-    the first parser), and parses offers from JSON returned by the first parser (through
-    the second parser).
-    """
-
-    def __init__(self, *parsers: AbstractDataParser) -> None:
-        self.__parsers = parsers
-
-    @override
-    def parse(self, *args, **kwargs) -> object:
-        result = self.__parsers[0].parse(*args, **kwargs)
-        for parser in self.__parsers[1:]:
-            result = parser.parse(result)
-        return result
 
 
 class AlibabaPageJsonParser(AbstractDataParser):

@@ -1,44 +1,22 @@
-"""
-Request handlers.
-
-This module contains interface and corresponding implementation of ``RequestHub``s, which
-is a concept introduced to resist from banning. The essense of it is to limit the
-frequency of requesting (along with disguise headers) to lower down the possibility to get
-banned from the host.
-"""
-
 import time
-from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from typing import override
 
 import requests
 from bs4 import BeautifulSoup, PageElement, ResultSet
 
-from .configuration import CONFIG
-from .exceptions import CaptchaException, RequestNotSuccessfulException
-from .urls import AbstractUrl
+from ..conf import CONFIG
+from ..exceptions import CaptchaException, RequestNotSuccessfulException
+from ..urls import AbstractUrl
+from .abstract import AbstractRequestHub
+
+__all__ = ["DefaultRequestHub"]
 
 
 def _captcha_blocked(source: str) -> bool:
     for landmark in CONFIG["captcha-detect"]["landmarks"]:
         if landmark not in source:
             return False
-
-
-class AbstractRequestHub(ABC):
-    """
-    Global manager of all requests that the crawler can send.
-
-    Frequent requests is one of the reason the crawler to be detected and banned. Thus, a
-    request manager (or request pool) is necessary. Each implementation of
-    :class:`AbstractRequestHub` is responsible for sending request at a relatively low
-    frequency.
-    """
-
-    @abstractmethod
-    def request(self, *args, **kwargs) -> str:
-        pass
 
 
 class DefaultRequestHub(AbstractRequestHub):
@@ -97,45 +75,3 @@ class DefaultRequestHub(AbstractRequestHub):
             if _captcha_blocked(script.text):
                 raise CaptchaException(url)
         return response.text
-
-
-class SleepyRequestHub(AbstractRequestHub):
-    """
-    Sleeps when received :class:`CaptchaException`, raises
-    :class:`RequestNotSuccessfulException` if sleep time exceeds the maximum sleep period.
-
-    This is a very simple and crude RequestHub: it does not use proxies to resist captcha,
-    it just sleeps until that disappears. The sleep interval is self-adaptive.
-    """
-
-    def __init__(
-        self,
-        request_interval: timedelta,
-        min_sleep: timedelta,
-        max_sleep: timedelta,
-    ) -> None:
-        """
-        :param request_interval: the interval between requests if it's not blocked.
-        :param min_sleep: the mininum, **non-ZERO** time to sleep when encountered with
-            captcha.
-        :param max_sleep: the maximum time to sleep when encountered with captcha.
-        """
-        assert min_sleep.total_seconds() != 0
-        self.request_interval = request_interval
-        self.max_sleep = max_sleep
-        self.__hub = DefaultRequestHub()
-        self.__interval = min_sleep
-
-    @override
-    def request(self, url: AbstractUrl | str) -> str:
-        try:
-            return self.__hub.request(url)
-        except CaptchaException:
-            while self.__interval < self.max_sleep:
-                time.sleep(self.__interval.total_seconds())
-                try:
-                    content = self.__hub.request(url)
-                    return content
-                except CaptchaException:
-                    self.__interval *= 2
-            raise RequestNotSuccessfulException(url, "asleep forever")
