@@ -9,10 +9,10 @@ class ComposeParser(AbstractDataParser):
     """
     A utility parser that compose several parsers.
 
-    For example, if the parser is composed of two parsers: :class:`AlibabaPageJsonParser`
-    and :class:`AlibabaJsonOffersParser`, then it parses json from the argument (through
-    the first parser), and parses offers from JSON returned by the first parser (through
-    the second parser).
+    For example, if the parser is composed of two parsers: a Html2JsonParser and a
+    Json2ObjectParser, then it parses JSON from the HTML passed in as method argument
+    (through the first parser), then parses objects from JSON returned by the first parser
+    (through the second parser).
     """
 
     def __init__(self, *parsers: AbstractDataParser) -> None:

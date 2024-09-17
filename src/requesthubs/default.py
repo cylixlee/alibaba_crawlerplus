@@ -1,9 +1,8 @@
 import time
 from datetime import datetime, timedelta
-from typing import override
+from typing import Callable, override
 
 import requests
-from bs4 import BeautifulSoup, PageElement, ResultSet
 
 from ..conf import CONFIG
 from ..exceptions import CaptchaException, RequestNotSuccessfulException
@@ -11,12 +10,6 @@ from ..urls import AbstractUrl
 from .abstract import AbstractRequestHub
 
 __all__ = ["DefaultRequestHub"]
-
-
-def _captcha_blocked(source: str) -> bool:
-    for landmark in CONFIG["captcha-detect"]["landmarks"]:
-        if landmark not in source:
-            return False
 
 
 class DefaultRequestHub(AbstractRequestHub):
@@ -31,9 +24,14 @@ class DefaultRequestHub(AbstractRequestHub):
     If the crawler got banned, it will take much longer to recover.
     """
 
-    def __init__(self, request_interval: timedelta) -> None:
+    def __init__(
+        self,
+        request_interval: timedelta,
+        captcha_detector: Callable[[str], bool] | None = None,
+    ) -> None:
         self.request_interval = request_interval
         self.last_request_time = datetime.now()
+        self.captcha_detector = captcha_detector
 
     @override
     def request(self, url: AbstractUrl | str) -> str:
@@ -65,13 +63,12 @@ class DefaultRequestHub(AbstractRequestHub):
         else:
             response = requests.get(url=url)
 
+        # status code check
         if response.status_code != 200:
             raise RequestNotSuccessfulException(url)
 
-        # captcha detection
-        html = BeautifulSoup(response.text, "html.parser")
-        scripts: ResultSet[PageElement] = html.find_all("script")
-        for script in scripts:
-            if _captcha_blocked(script.text):
+        # (optional) captcha detection
+        if self.captcha_detector is not None:
+            if self.captcha_detector(response.text):
                 raise CaptchaException(url)
         return response.text
