@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-def __load_config(path: pathlib.Path):
+def _load_config(path: pathlib.Path):
     with open(path, encoding="utf8") as f:
         return yaml.load(f, Loader=yaml.Loader)
 
@@ -27,4 +27,4 @@ def __load_config(path: pathlib.Path):
 PROJECT_DIR = pathlib.Path(__file__).parent.parent.absolute()
 DATA_DIR = PROJECT_DIR / "data"
 
-CONFIG = __load_config(PROJECT_DIR / "crawler-config.yaml")
+CONFIG = _load_config(PROJECT_DIR / "crawler-config.yaml")

@@ -1,18 +1,15 @@
 administrative-area:
-  address: "jiangsu"
-  name: "江苏省"
-  children:
-    - address: "taizhou"
-      name: "泰州市"
-      children:
-        - { address: "suqian", name: "经济开发区" }
-        - { address: "economic", name: "经济开发区" }
-        - { address: "hailing", name: "海陵区" }
-        - { address: "gaogang", name: "高港区" }
-        - { address: "jiangyan", name: "姜堰区" }
-        - { address: "xinghua", name: "兴化市" }
-        - { address: "jingjiang", name: "靖江市" }
-        - { address: "taixing", name: "泰兴市" }
+  - address: "taizhou"
+    name: "泰州市"
+    children:
+      - { address: "suqian", name: "经济开发区" }
+      - { address: "economic", name: "经济开发区" }
+      - { address: "hailing", name: "海陵区" }
+      - { address: "gaogang", name: "高港区" }
+      - { address: "jiangyan", name: "姜堰区" }
+      - { address: "xinghua", name: "兴化市" }
+      - { address: "jingjiang", name: "靖江市" }
+      - { address: "taixing", name: "泰兴市" }
 
 disguise-headers:
   Referer: "https://onetalk.alibaba.com/"

@@ -11,17 +11,20 @@ crawl all the data out.
 
 import json
 from abc import ABC, abstractmethod
+from dataclasses import asdict
 from typing import override
 
 from bs4 import BeautifulSoup, PageElement, ResultSet
-from lxml.etree import _Element
+from lxml.etree import HTML, _Element
 
+from .addressing import administrative_address_of
 from .configuration import CONFIG
 from .datamodels import AlibabaCompanyDetail, AlibabaCompanyOffer
 from .exceptions import ElementNotFoundException
 
 __all__ = [
     "AbstractDataParser",
+    "ComposeParser",
     "AlibabaPageJsonParser",
     "AlibabaJsonOffersParser",
 ]
@@ -39,6 +42,27 @@ class AbstractDataParser(ABC):
     @abstractmethod
     def parse(self, *args, **kwargs) -> object:
         pass
+
+
+class ComposeParser(AbstractDataParser):
+    """
+    A utility parser that compose several parsers.
+
+    For example, if the parser is composed of two parsers: :class:`AlibabaPageJsonParser`
+    and :class:`AlibabaJsonOffersParser`, then it parses json from the argument (through
+    the first parser), and parses offers from JSON returned by the first parser (through
+    the second parser).
+    """
+
+    def __init__(self, *parsers: AbstractDataParser) -> None:
+        self.__parsers = parsers
+
+    @override
+    def parse(self, *args, **kwargs) -> object:
+        result = self.__parsers[0].parse(*args, **kwargs)
+        for parser in self.__parsers[1:]:
+            result = parser.parse(result)
+        return result
 
 
 class AlibabaPageJsonParser(AbstractDataParser):
@@ -121,7 +145,7 @@ class AlibabaJsonOffersParser(AbstractDataParser):
         return offers
 
 
-def __content_of(html: _Element, xpaths: list[str]) -> str:
+def _content_of(html: _Element, xpaths: list[str]) -> str:
     for xpath in xpaths:
         elements: list[_Element] = html.xpath(xpath)
         if elements is not None and len(elements) > 0:
@@ -130,28 +154,31 @@ def __content_of(html: _Element, xpaths: list[str]) -> str:
 
 
 class AlibabaXpathCompanyParser(AbstractDataParser):
+    """
+    Parses :class:`AlibabaCompanyDetail` from pages using XPath.
+
+    There's only several additional fields we need to parse: bills, and administrative
+    address.
+    """
+
     @override
     def parse(
         self,
         offer: AlibabaCompanyOffer,
         data: bytes | str,
     ) -> AlibabaCompanyDetail:
-        # # create LXML parser
-        # if isinstance(data, bytes):
-        #     data = data.decode()
-        # html = HTML(data)
+        # create LXML parser
+        if isinstance(data, bytes):
+            data = data.decode()
+        html = HTML(data)
 
-        # # parse elements
-        # bill = __content_of(CONFIG["xpath"]["bill"])
-        # address = __content_of(CONFIG["xpath"]["address"])
+        # parse elements
+        bill = _content_of(html, CONFIG["xpath"]["bill"])
+        address = _content_of(html, CONFIG["xpath"]["address"])
+        address_list = administrative_address_of([address, offer.name])
 
-        # city: str = ""
-        # district: str = ""
-
-        # return AlibabaCompanyDetail(
-        #     city=city,
-        #     district=district,
-        #     bill=bill,
-        #     **asdict(offer),
-        # )
-        raise NotImplementedError()
+        return AlibabaCompanyDetail(
+            administrative_address=address_list,
+            bill=bill,
+            **asdict(offer),
+        )

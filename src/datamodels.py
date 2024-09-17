@@ -28,8 +28,7 @@ class AlibabaCompanyOffer(object):
 
 @dataclass
 class AlibabaCompanyDetail(AlibabaCompanyOffer):
-    city: str
-    district: str
+    administrative_address: list[str]
     bill: str
 
 

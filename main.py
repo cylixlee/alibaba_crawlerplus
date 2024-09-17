@@ -1,4 +1,13 @@
-from src.addressing import administrative_address_of
+import pprint
+
+from src.configuration import DATA_DIR
+from src.datamodels import AlibabaCompanyOffer
+from src.parsers import (
+    AlibabaJsonOffersParser,
+    AlibabaPageJsonParser,
+    AlibabaXpathCompanyParser,
+    ComposeParser,
+)
 
 
 def main():
@@ -17,46 +26,19 @@ def main():
     Additionally, the `main()` function should not receive any arguments. Startup
     arguments should be written in configuration files.
     """
+    with open(DATA_DIR / "sample.html", encoding="utf8") as f:
+        data = f.read()
+        parser = ComposeParser(
+            AlibabaPageJsonParser(),
+            AlibabaJsonOffersParser(),
+        )
+        offers: list[AlibabaCompanyOffer] = parser.parse(data)
 
-    # # Temporary code to fetch contents.
-    # hub = DefaultRequestHub(timedelta(seconds=3))
-    # url = AlibabaSearchUrl(
-    #     "Hailing",
-    #     tab=AlibabaSearchTab.Suppliers,
-    #     country=AlibabaSupplierCountry.China,
-    #     page=33,
-    # )
-    # print(url)
-    # content = hub.request(url)
-
-    # with open(DATA_DIR / "sample-nooffers.html", "w", encoding="utf8") as f:
-    #     f.write(content)
-
-    # # Temporary code to parse page.
-    # with open(DATA_DIR / "sample-nooffers.html", encoding="utf8") as f:
-    #     content = f.read()
-    # parser = AlibabaPageJsonParser()
-    # with open(DATA_DIR / "sample-nooffers.json", "w", encoding="utf8") as f:
-    #     jsonobj = parser.parse(content)
-    #     json.dump(jsonobj, f, indent=4)
-
-    # # Temporary code to parse offers.
-    # with open(DATA_DIR / "sample.json", encoding="utf8") as f:
-    #     jsonobj = json.load(f)
-    # parser = AlibabaJsonOffersParser()
-    # offers = parser.parse(jsonobj)
-    # with open(DATA_DIR / "sample-detail-urls.txt", "w", encoding="utf8") as f:
-    #     f.writelines([str(offer) + "\n" for offer in offers])
-
-    # # Temporary code to fetch detail page.
-    # with open(DATA_DIR / "sample-detail.html", "w", encoding="utf8") as f:
-    #     content = hub.request(offers[0].detail_url)
-    #     f.write(content)
-
-    # Temporary code to test addressing.
-    print(
-        administrative_address_of("Taizhou Gaogang District Miaorun Trading Co., Ltd")
-    )
+    with open(DATA_DIR / "sample-detail.html", encoding="utf8") as f:
+        data = f.read()
+        parser = AlibabaXpathCompanyParser()
+        detail = parser.parse(offers[0], data)
+        pprint.pp(detail)
 
 
 # Guideline recommended Main Guard

@@ -20,7 +20,7 @@ from .exceptions import CaptchaException, RequestNotSuccessfulException
 from .urls import AbstractUrl
 
 
-def __captcha_blocked(source: str) -> bool:
+def _captcha_blocked(source: str) -> bool:
     for landmark in CONFIG["captcha-detect"]["landmarks"]:
         if landmark not in source:
             return False
@@ -94,7 +94,7 @@ class DefaultRequestHub(AbstractRequestHub):
         html = BeautifulSoup(response.text, "html.parser")
         scripts: ResultSet[PageElement] = html.find_all("script")
         for script in scripts:
-            if __captcha_blocked(script.text):
+            if _captcha_blocked(script.text):
                 raise CaptchaException(url)
         return response.text
 
