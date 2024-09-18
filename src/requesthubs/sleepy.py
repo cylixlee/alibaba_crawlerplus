@@ -47,7 +47,8 @@ class SleepyRequestHub(AbstractRequestHub):
     def request(self, url: AbstractUrl | str) -> str:
         try:
             return self._hub.request(url)
-        except CaptchaException:
+        except CaptchaException as e:
+            print(e)
             while self._interval < self.max_sleep:
                 self.sleep()
                 try:

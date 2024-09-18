@@ -12,8 +12,6 @@ from src.requesthubs import (
 )
 from src.urls import AlibabaSearchTab, AlibabaSearchUrl, AlibabaSupplierCountry
 
-type OffersCrawlerResult = dict[AdministrativeArea, list[AlibabaCompanyOffer]]
-
 PROJECT_DIR = pathlib.Path(__file__).parent
 CACHE_DIR = PROJECT_DIR / "cache"
 
@@ -21,10 +19,12 @@ CACHE_DIR = PROJECT_DIR / "cache"
 class OffersCrawler(DefaultResumableState):
     def __init__(self, path: pathlib.Path, *, requesthub: AbstractRequestHub) -> None:
         super().__init__(path)
-        self._offers: OffersCrawlerResult = {}
+        self._offers: dict[AdministrativeArea, list[AlibabaCompanyOffer]] = {}
+        self._pages: dict[AdministrativeArea, int] = {}
+        self._completed: set[AdministrativeArea] = set()
         self._requesthub = requesthub
 
-    def crawl(self) -> OffersCrawlerResult:
+    def crawl(self) -> dict[AdministrativeArea, list[AlibabaCompanyOffer]]:
         for unit in administrative_units():
             # (kind of) Integrity check.
             #
@@ -32,29 +32,42 @@ class OffersCrawler(DefaultResumableState):
             # result; otherwise, incremental crawling is performed.
             #
             # This saves a lot of duplicate work and makes this task resumable.
-            if unit not in self._offers.keys():
+            if unit not in self._completed:
+                print(f"crawling area {unit.name} ({unit.address})")
                 self._crawl_area(unit)
+            else:
+                print(f"area {unit.name} ({unit.address}) clear (cached).")
         return self._offers
 
+    @transaction
     def _crawl_area(self, area: AdministrativeArea) -> None:
         parser = ComposeParser(
             AlibabaPageJsonParser(),
             AlibabaJsonOffersParser(),
         )
-        page = 0
+
+        if area not in self._pages.keys():
+            print("=== starting from page 1 ===")
+            self._pages[area] = 1
+        else:
+            print(f"=== continue from page {self._pages[area]} ===")
+
         while True:
             url = AlibabaSearchUrl(
                 area.address,
                 tab=AlibabaSearchTab.Suppliers,
                 country=AlibabaSupplierCountry.China,
-                page=page,
+                page=self._pages[area],
             )
             content = self._requesthub.request(url)
             offers: list[AlibabaCompanyOffer] = parser.parse(content)
             if not offers:
                 break
-            print(f"crawled {len(offers)} offers...")
+
+            print(f"crawled {len(offers)} offers (from {url})...")
+            self._pages[area] += 1
             self._save_offers(area, offers)
+        self._completed.add(area)
 
     @transaction
     def _save_offers(
@@ -63,11 +76,10 @@ class OffersCrawler(DefaultResumableState):
         offers: list[AlibabaCompanyOffer],
     ) -> None:
         if area not in self._offers.keys():
-            offerlist = []
-            self._offers[area] = offerlist
+            print(f"creating new offerlist of {area.name} ({area.address})")
+            self._offers[area] = offers
         else:
-            offerlist = self._offers[area]
-        offerlist.extend(offers)
+            self._offers[area].extend(offers)
 
 
 def main() -> None:
@@ -92,7 +104,13 @@ def main() -> None:
         max_sleep=timedelta(minutes=90),
         captcha_detector=default_captcha_detector,
     )
-    crawler = OffersCrawler(CACHE_DIR / "offers.pickle", requesthub=requesthub)
+
+    cache_path = CACHE_DIR / "offers.pickle"
+    if cache_path.exists():
+        crawler = OffersCrawler.load(cache_path)
+        crawler._requesthub = requesthub
+    else:
+        crawler = OffersCrawler(cache_path, requesthub=requesthub)
     crawler.crawl()
 
 
