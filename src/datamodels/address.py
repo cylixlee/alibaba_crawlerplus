@@ -1,4 +1,4 @@
-from dataclasses import astuple, dataclass
+from dataclasses import dataclass
 from typing import Self
 
 __all__ = ["AdministrativeArea"]
@@ -12,4 +12,4 @@ class AdministrativeArea(object):
     children: list[Self]
 
     def __hash__(self) -> int:
-        return hash(astuple(self))
+        return hash((self.address, self.name))

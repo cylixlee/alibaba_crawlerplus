@@ -9,7 +9,17 @@ from ..exceptions import CaptchaException, RequestNotSuccessfulException
 from ..urls import AbstractUrl
 from .abstract import AbstractRequestHub
 
-__all__ = ["DefaultRequestHub"]
+__all__ = [
+    "CaptchaDetector",
+    "default_captcha_detector",
+    "DefaultRequestHub",
+]
+
+type CaptchaDetector = Callable[[str], bool]
+
+
+def default_captcha_detector(content: str) -> bool:
+    return "captcha" in content
 
 
 class DefaultRequestHub(AbstractRequestHub):
@@ -27,7 +37,7 @@ class DefaultRequestHub(AbstractRequestHub):
     def __init__(
         self,
         request_interval: timedelta,
-        captcha_detector: Callable[[str], bool] | None = None,
+        captcha_detector: CaptchaDetector | None = None,
     ) -> None:
         self.request_interval = request_interval
         self.last_request_time = datetime.now()

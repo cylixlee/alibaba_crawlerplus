@@ -5,7 +5,7 @@ from typing import override
 from ..exceptions import CaptchaException, RequestNotSuccessfulException
 from ..urls import AbstractUrl
 from .abstract import AbstractRequestHub
-from .default import DefaultRequestHub
+from .default import CaptchaDetector, DefaultRequestHub
 
 __all__ = ["SleepyRequestHub"]
 
@@ -24,6 +24,7 @@ class SleepyRequestHub(AbstractRequestHub):
         request_interval: timedelta,
         min_sleep: timedelta,
         max_sleep: timedelta,
+        captcha_detector: CaptchaDetector | None = None,
     ) -> None:
         """
         :param request_interval: the interval between requests if it's not blocked.
@@ -34,7 +35,7 @@ class SleepyRequestHub(AbstractRequestHub):
         assert min_sleep.total_seconds() != 0
         self.request_interval = request_interval
         self.max_sleep = max_sleep
-        self._hub = DefaultRequestHub()
+        self._hub = DefaultRequestHub(request_interval, captcha_detector)
         self._interval = min_sleep
 
     def sleep(self) -> None:
