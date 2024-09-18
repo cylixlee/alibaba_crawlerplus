@@ -105,7 +105,7 @@ def _load(data: dict) -> AdministrativeArea:
 def _search(addr: str, area: AdministrativeArea) -> list[str] | None:
     for child in area.children:
         childresult = _search(addr, child)
-        if len(childresult) > 0:  # matches the first child that appears in addr.
+        if childresult:  # matches the first child that appears in addr.
             return [area.name, *childresult]
     if area.address in addr:
         return [area.name]

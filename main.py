@@ -124,7 +124,9 @@ class DetailsCrawler(DefaultResumableState):
             print(f"=== continue from index {self._indices[area]} ===")
 
         while self._indices[area] < len(offers):
-            self._crawl_detail(area, offers[self._indices[area]])
+            offer = offers[self._indices[area]]
+            print(f"crawling offer {self._indices[area]} from {offer.detail_url}")
+            self._crawl_detail(area, offer)
         self._completed.add(area)
 
     @transaction
