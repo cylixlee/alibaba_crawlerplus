@@ -2,6 +2,8 @@ import time
 from datetime import timedelta
 from typing import override
 
+from tqdm import trange
+
 from ..exceptions import CaptchaException, RequestNotSuccessfulException
 from ..urls import AbstractUrl
 from .abstract import AbstractRequestHub
@@ -39,9 +41,10 @@ class SleepyRequestHub(AbstractRequestHub):
         self._interval = min_sleep
 
     def sleep(self) -> None:
-        seconds = self._interval.total_seconds()
+        seconds = int(self._interval.total_seconds())
         print(f"captcha detected. sleeping for {seconds}s...")
-        time.sleep(seconds)
+        for _ in trange(seconds, desc="Zz Zz~", leave=False):
+            time.sleep(1)
 
     @override
     def request(self, url: AbstractUrl | str) -> str:
