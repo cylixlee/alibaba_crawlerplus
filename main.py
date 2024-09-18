@@ -1,10 +1,15 @@
 import pathlib
 from datetime import timedelta
 
-from src.datamodels import AdministrativeArea, AlibabaCompanyOffer
+from src.datamodels import AdministrativeArea, AlibabaCompanyDetail, AlibabaCompanyOffer
 from src.misc.addressing import administrative_units
 from src.misc.resuming import DefaultResumableState, transaction
-from src.parsers import AlibabaJsonOffersParser, AlibabaPageJsonParser, ComposeParser
+from src.parsers import (
+    AlibabaJsonOffersParser,
+    AlibabaPageJsonParser,
+    AlibabaXpathCompanyParser,
+    ComposeParser,
+)
 from src.requesthubs import (
     AbstractRequestHub,
     SleepyRequestHub,
@@ -36,7 +41,7 @@ class OffersCrawler(DefaultResumableState):
                 print(f"crawling area {unit.name} ({unit.address})")
                 self._crawl_area(unit)
             else:
-                print(f"area {unit.name} ({unit.address}) clear (cached).")
+                print(f"(offers) area {unit.name} ({unit.address}) clear (cached).")
         return self._offers
 
     @transaction
@@ -82,6 +87,62 @@ class OffersCrawler(DefaultResumableState):
             self._offers[area].extend(offers)
 
 
+class DetailsCrawler(DefaultResumableState):
+    def __init__(
+        self,
+        path: pathlib.Path,
+        offers: dict[AdministrativeArea, list[AlibabaCompanyOffer]],
+        *,
+        requesthub: AbstractRequestHub,
+    ) -> None:
+        super().__init__(path)
+        self._offers = offers
+        self._details: dict[AdministrativeArea, list[AlibabaCompanyDetail]] = {}
+        self._requesthub = requesthub
+        self._indices: dict[AdministrativeArea, int] = {}
+        self._completed: set[AdministrativeArea] = set()
+        self._parser = AlibabaXpathCompanyParser()
+
+    def crawl(self) -> dict[AdministrativeArea, list[AlibabaCompanyDetail]]:
+        for area, offers in self._offers.items():
+            if area not in self._completed:
+                self._crawl_area(area, offers)
+            else:
+                print(f"(detail) area {area.name} ({area.address}) clear (cached).")
+        return self._details
+
+    @transaction
+    def _crawl_area(
+        self,
+        area: AdministrativeArea,
+        offers: list[AlibabaCompanyOffer],
+    ) -> None:
+        if area not in self._indices.keys():
+            self._indices[area] = 0
+            print(f"=== starting from index {self._indices[area]} ===")
+        else:
+            print(f"=== continue from index {self._indices[area]} ===")
+
+        while self._indices[area] < len(offers):
+            self._crawl_detail(area, offers[self._indices[area]])
+        self._completed.add(area)
+
+    @transaction
+    def _crawl_detail(
+        self,
+        area: AdministrativeArea,
+        offer: AlibabaCompanyOffer,
+    ) -> None:
+        content = self._requesthub.request(offer.detail_url)
+        detail = self._parser.parse(offer, content)
+        if area not in self._details:
+            print(f"creating new detaillist of {area.name} ({area.address})")
+            self._details[area] = [detail]
+        else:
+            self._details[area].append(detail)
+        self._indices[area] += 1
+
+
 def main() -> None:
     """
     Entrypoint of this program.
@@ -105,13 +166,26 @@ def main() -> None:
         captcha_detector=default_captcha_detector,
     )
 
-    cache_path = CACHE_DIR / "offers.pickle"
-    if cache_path.exists():
-        crawler = OffersCrawler.load(cache_path)
-        crawler._requesthub = requesthub
+    offers_cache_path = CACHE_DIR / "offers.pickle"
+    details_cache_path = CACHE_DIR / "details.pickle"
+
+    if offers_cache_path.exists():
+        offers_crawler = OffersCrawler.load(offers_cache_path)
+        offers_crawler._requesthub = requesthub
     else:
-        crawler = OffersCrawler(cache_path, requesthub=requesthub)
-    crawler.crawl()
+        offers_crawler = OffersCrawler(offers_cache_path, requesthub=requesthub)
+    offers = offers_crawler.crawl()
+
+    if details_cache_path.exists():
+        details_crawler = DetailsCrawler.load(details_cache_path)
+        details_crawler._requesthub = requesthub
+    else:
+        details_crawler = DetailsCrawler(
+            details_cache_path,
+            offers,
+            requesthub=requesthub,
+        )
+    details_crawler.crawl()
 
 
 # Guideline recommended Main Guard
