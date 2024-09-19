@@ -5,6 +5,7 @@ from typing import Self, override
 
 from selenium.webdriver import Edge, EdgeOptions, Remote
 
+from src.conf import CONFIG
 from src.datamodels import AdministrativeArea, AlibabaCompanyDetail, AlibabaCompanyOffer
 from src.interactive import AlibabaDetailPageBrowser
 from src.misc.addressing import administrative_units
@@ -209,8 +210,27 @@ def main() -> None:
     offers = offers_crawler.crawl()
 
     options = EdgeOptions()
+    options.add_argument("lang=zh_CN.UTF-8")
+    options.add_argument(f'User-Agent="{CONFIG["disguise-headers"]["User-Agent"]}"')
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-popup-blocking")
+    options.add_argument("--hide-scrollbars")
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option("useAutomationExtension", False)
     options.add_argument("--disable-blink-features=AutomationControlled")
     with Edge(options) as driver:
+        driver.execute_cdp_cmd(
+            "Page.addScriptToEvaluateOnNewDocument",
+            {
+                "source": """
+                    Object.defineProperty(navigator, 'webdriver', {
+                        get: () => undefined
+                    })
+                """
+            },
+        )
+
         if details_cache_path.exists():
             details_crawler = DetailsCrawler.load(details_cache_path, driver)
         else:

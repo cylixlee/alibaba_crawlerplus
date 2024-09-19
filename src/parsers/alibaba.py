@@ -1,21 +1,16 @@
 import json
-from dataclasses import asdict
 from typing import override
 
 from bs4 import BeautifulSoup, PageElement, ResultSet
-from lxml.etree import HTML, _Element
-from typing_extensions import deprecated
 
 from ..conf import CONFIG
-from ..datamodels import AlibabaCompanyDetail, AlibabaCompanyOffer
+from ..datamodels import AlibabaCompanyOffer
 from ..exceptions import ElementNotFoundException
-from ..misc.addressing import administrative_address_of
 from .abstract import AbstractDataParser
 
 __all__ = [
     "AlibabaPageJsonParser",
     "AlibabaJsonOffersParser",
-    "AlibabaXpathCompanyParser",
 ]
 
 
@@ -97,44 +92,3 @@ class AlibabaJsonOffersParser(AbstractDataParser):
             # append offer object
             offers.append(obj)
         return offers
-
-
-@deprecated("Alibaba now denys almost all requests to detail pages")
-def _content_of(html: _Element, xpaths: list[str]) -> str:
-    for xpath in xpaths:
-        elements: list[_Element] = html.xpath(xpath)
-        if elements:
-            return elements[0].text
-    return ""
-
-
-@deprecated("Alibaba now denys almost all requests to detail pages")
-class AlibabaXpathCompanyParser(AbstractDataParser):
-    """
-    Parses :class:`AlibabaCompanyDetail` from pages using XPath.
-
-    There's only several additional fields we need to parse: bills, and administrative
-    address.
-    """
-
-    @override
-    def parse(
-        self,
-        offer: AlibabaCompanyOffer,
-        data: bytes | str,
-    ) -> AlibabaCompanyDetail:
-        # create LXML parser
-        if isinstance(data, bytes):
-            data = data.decode()
-        html = HTML(data)
-
-        # parse elements
-        bill = _content_of(html, CONFIG["xpath"]["bill"])
-        address = _content_of(html, CONFIG["xpath"]["address"])
-        address_list = administrative_address_of([address, offer.name])
-
-        return AlibabaCompanyDetail(
-            administrative_address=address_list,
-            bill=bill,
-            **asdict(offer),
-        )
