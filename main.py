@@ -1,13 +1,17 @@
 import pathlib
+import pickle
 from datetime import timedelta
+from typing import Self, override
+
+from selenium.webdriver import Edge, EdgeOptions, Remote
 
 from src.datamodels import AdministrativeArea, AlibabaCompanyDetail, AlibabaCompanyOffer
+from src.interactive import AlibabaDetailPageBrowser
 from src.misc.addressing import administrative_units
-from src.misc.resuming import DefaultResumableState, transaction
+from src.misc.resuming import AbstractResumableState, DefaultResumableState, transaction
 from src.parsers import (
     AlibabaJsonOffersParser,
     AlibabaPageJsonParser,
-    AlibabaXpathCompanyParser,
     ComposeParser,
 )
 from src.requesthubs import (
@@ -87,21 +91,48 @@ class OffersCrawler(DefaultResumableState):
             self._offers[area].extend(offers)
 
 
-class DetailsCrawler(DefaultResumableState):
+class DetailsCrawler(AbstractResumableState):
+    @classmethod
+    @override
+    def load(cls, path: pathlib.Path, driver: Remote) -> Self:
+        instance = DetailsCrawler(None, None, driver=driver)
+        with open(path, "rb") as f:
+            (
+                instance._cache_path,
+                instance._offers,
+                instance._details,
+                instance._indices,
+                instance._completed,
+            ) = pickle.load(f)
+        return instance
+
+    @override
+    def store(self) -> None:
+        with open(self._cache_path, "wb") as f:
+            pickle.dump(
+                (
+                    self._cache_path,
+                    self._offers,
+                    self._details,
+                    self._indices,
+                    self._completed,
+                ),
+                f,
+            )
+
     def __init__(
         self,
         path: pathlib.Path,
         offers: dict[AdministrativeArea, list[AlibabaCompanyOffer]],
         *,
-        requesthub: AbstractRequestHub,
+        driver: Remote,
     ) -> None:
-        super().__init__(path)
+        self._cache_path = path
         self._offers = offers
         self._details: dict[AdministrativeArea, list[AlibabaCompanyDetail]] = {}
-        self._requesthub = requesthub
         self._indices: dict[AdministrativeArea, int] = {}
         self._completed: set[AdministrativeArea] = set()
-        self._parser = AlibabaXpathCompanyParser()
+        self._browser = AlibabaDetailPageBrowser(driver)
 
     def crawl(self) -> dict[AdministrativeArea, list[AlibabaCompanyDetail]]:
         for area, offers in self._offers.items():
@@ -135,8 +166,7 @@ class DetailsCrawler(DefaultResumableState):
         area: AdministrativeArea,
         offer: AlibabaCompanyOffer,
     ) -> None:
-        content = self._requesthub.request(offer.detail_url)
-        detail = self._parser.parse(offer, content)
+        detail = self._browser.perform(offer)
         if area not in self._details:
             print(f"creating new detaillist of {area.name} ({area.address})")
             self._details[area] = [detail]
@@ -178,16 +208,14 @@ def main() -> None:
         offers_crawler = OffersCrawler(offers_cache_path, requesthub=requesthub)
     offers = offers_crawler.crawl()
 
-    if details_cache_path.exists():
-        details_crawler = DetailsCrawler.load(details_cache_path)
-        details_crawler._requesthub = requesthub
-    else:
-        details_crawler = DetailsCrawler(
-            details_cache_path,
-            offers,
-            requesthub=requesthub,
-        )
-    details_crawler.crawl()
+    options = EdgeOptions()
+    options.add_argument("--disable-blink-features=AutomationControlled")
+    with Edge(options) as driver:
+        if details_cache_path.exists():
+            details_crawler = DetailsCrawler.load(details_cache_path, driver)
+        else:
+            details_crawler = DetailsCrawler(details_cache_path, offers, driver=driver)
+        details_crawler.crawl()
 
 
 # Guideline recommended Main Guard

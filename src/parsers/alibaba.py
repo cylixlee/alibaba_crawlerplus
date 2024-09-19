@@ -4,6 +4,7 @@ from typing import override
 
 from bs4 import BeautifulSoup, PageElement, ResultSet
 from lxml.etree import HTML, _Element
+from typing_extensions import deprecated
 
 from ..conf import CONFIG
 from ..datamodels import AlibabaCompanyDetail, AlibabaCompanyOffer
@@ -98,6 +99,7 @@ class AlibabaJsonOffersParser(AbstractDataParser):
         return offers
 
 
+@deprecated("Alibaba now denys almost all requests to detail pages")
 def _content_of(html: _Element, xpaths: list[str]) -> str:
     for xpath in xpaths:
         elements: list[_Element] = html.xpath(xpath)
@@ -106,6 +108,7 @@ def _content_of(html: _Element, xpaths: list[str]) -> str:
     return ""
 
 
+@deprecated("Alibaba now denys almost all requests to detail pages")
 class AlibabaXpathCompanyParser(AbstractDataParser):
     """
     Parses :class:`AlibabaCompanyDetail` from pages using XPath.

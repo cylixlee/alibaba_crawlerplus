@@ -12,7 +12,7 @@ def _main():
             for offer in offers:
                 print(offer, file=f)
     with open(INSPECT_DIR / "details.txt", "w", encoding="utf8") as f:
-        crawler = DetailsCrawler.load(CACHE_DIR / "details.pickle")
+        crawler = DetailsCrawler.load(CACHE_DIR / "details.pickle", None)
         for area, details in crawler._details.items():
             print(f"area {area.name} ({area.address}) with {len(details)} details.")
             print(f"====== for area {area.name} ({area.address}) ======:", file=f)
