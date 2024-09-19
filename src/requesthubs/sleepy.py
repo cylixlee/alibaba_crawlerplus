@@ -48,6 +48,13 @@ class SleepyRequestHub(AbstractRequestHub):
 
     @override
     def request(self, url: AbstractUrl | str) -> str:
+        """
+        Request the URL passed in. Sleeps when captcha is detected.
+
+        It maintains a adaptive sleep interval. When the response is a captcha page, it
+        doubles the interval and sleeps. When the interval exceeds the limit, it raises
+        :class:`RequestNotSuccessfulException`.
+        """
         try:
             return self._hub.request(url)
         except CaptchaException as e:

@@ -48,6 +48,10 @@ def administrative_areas() -> list[AdministrativeArea]:
 def administrative_units() -> list[AdministrativeArea]:
     """
     Returns all nodes of all administrative area trees.
+
+    This function behaves differently from the previous versions. It now returns all node
+    instead of leaf nodes, in order to provide a more complete list of address. That is
+    very useful when crawling data from the search engine.
     """
     global _administrative_units
 

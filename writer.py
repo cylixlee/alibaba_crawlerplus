@@ -1,3 +1,11 @@
+"""
+Read data from cache and emits them as Excel Datasheets (.xlsx)
+
+This is the data format required by the first party. Storing data directly into XLS files
+is also feasible, but will be very hard to implement the **resumable crawling**. Thus, a
+converter from program cache to the desired data format is necessary.
+"""
+
 import pandas as pd
 
 from main import CACHE_DIR, PROJECT_DIR, DetailsCrawler
@@ -30,10 +38,10 @@ def main() -> None:
     cache_path = CACHE_DIR / "details.pickle"
     cache = DetailsCrawler.load(cache_path, None)
     for area, details in cache._details.items():
-        _write_area(area, details)
+        write_area(area, details)
 
 
-def _write_area(area: AdministrativeArea, details: list[AlibabaCompanyDetail]) -> None:
+def write_area(area: AdministrativeArea, details: list[AlibabaCompanyDetail]) -> None:
     sheet = pd.DataFrame(
         columns=[
             "营业单位\n(中文名称)",

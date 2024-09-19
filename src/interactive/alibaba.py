@@ -16,6 +16,24 @@ __all__ = ["AlibabaDetailPageBrowser"]
 
 
 class AlibabaDetailPageBrowser(AbstractInteractiveBrowser):
+    """
+    A interactive browser of Alibaba's company detail page.
+
+    As for now, Alibaba takes a strict watch on detail pages. We can use simple GET
+    requests to crawl data from the search engine, but never the detail page. Captcha will
+    catch 'ya.
+
+    This class performs interactive crawling when a :class:`AlibabaCompanyOffer` is passed
+    in, and waits for manual verification when "captcha" string is found in the source of
+    the current page. :class:`ActionChain` of Selenium framework was adopted but couldn't
+    bypass the detection of Alibaba.
+
+    According to the data model of :class:`AlibabaCompanyDetail`, it just needs to crawl 2
+    more items in the detail page: the bill flow and the administrative address. The Xpath
+    of the 2 elements are described in configuration file, and the 2 items are left empty
+    when not found.
+    """
+
     def __init__(self, driver: Remote) -> None:
         self._driver = driver
 
@@ -24,57 +42,11 @@ class AlibabaDetailPageBrowser(AbstractInteractiveBrowser):
         self._driver.maximize_window()
         # open detail page
         self._driver.get(offer.detail_url)
-        time.sleep(2)
-        # automation_trial = False
         while self._driver.current_url != offer.detail_url:
             # captcha detection
             if "captcha" in self._driver.page_source:
                 print("(de-captcha) waiting for manual verification")
                 time.sleep(15)
-                # if automation_trial:
-                #     print("(de-captcha) waiting for manual verification...")
-                #     time.sleep(15)
-                #     continue
-
-                # retrial = 0
-                # while retrial < CONFIG["captcha"]["retry"]:
-                #     # try to automate several times.
-                #     if "captcha" not in self._driver.page_source:
-                #         break
-
-                #     try:
-                #         print("(de-captcha) trying to automate verification...")
-                #         time.sleep(3)
-                #         slider = self._driver.find_element(
-                #             By.XPATH,
-                #             CONFIG["captcha"]["slider"],
-                #         )
-                #         # hold the slider
-                #         ActionChains(self._driver).click_and_hold(slider).perform()
-                #         x = random.randint(
-                #             CONFIG["captcha"]["min-slide"],
-                #             CONFIG["captcha"]["max-slide"],
-                #         )
-                #         y = random.randint(-50, 50)
-                #         ActionChains(self._driver).move_by_offset(
-                #             x, y
-                #         ).release().perform()
-                #         retrial += 1
-                #     except NoSuchElementException:
-                #         while retrial < CONFIG["captcha"]["retry"]:
-                #             try:
-                #                 retry_button = self._driver.find_element(
-                #                     By.XPATH,
-                #                     CONFIG["captcha"]["retry-button"],
-                #                 )
-                #                 ActionChains(self._driver).click(retry_button).perform()
-                #                 retrial += 1
-                #             except NoSuchElementException:
-                #                 break
-                #         if retrial >= CONFIG["captcha"]["retry"]:
-                #             print("sorry, failed to get slider item...")
-                #             break
-                # automation_trial = True
             # wait for the browser to get prepared
             time.sleep(3)
 

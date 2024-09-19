@@ -6,6 +6,16 @@ __all__ = ["AdministrativeArea"]
 
 @dataclass
 class AdministrativeArea(object):
+    """
+    A structure representing an administrative area (province, city, district, etc.)
+
+    :method:`__eq__` and :method:`__hash__` are implemented in order to put instances of
+    this class as dict (hashmap) keys.
+
+    Note that there're two fields: :field:`parent` and :field:`child`, which are not
+    participated in calculating the hash. Resursive hell will happen if we do so.
+    """
+
     address: str
     name: str
     parent: Self | None
