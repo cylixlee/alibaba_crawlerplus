@@ -15,10 +15,12 @@ disguise-headers:
   Sec-Ch-Ua-Platform: '"Windows"'
   User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0"
 
-captcha:
-  slider: '//*[@id="nc_1_n1z"]'
-  min-slide-width: 320
-  max-slide-width: 450
+# captcha:
+#   slider: '//*[@id="nc_1_n1z"]'
+#   retry-button: '//*[@id="`nc_1_refresh1`"]'
+#   min-slide: 320
+#   max-slide: 450
+#   retry: 5
 
 json-parser:
   landmark: "_PAGE_DATA_"
