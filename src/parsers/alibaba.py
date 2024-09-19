@@ -87,7 +87,7 @@ class AlibabaJsonOffersParser(AbstractDataParser):
                 name=offer[template["name"]],
                 provided_products=offer[template["provided-products"]],
                 # domain need to be parsed out
-                domain=detail_url.split(".en")[0].split("//")[1],
+                domain=detail_url.split(".")[0].split("//")[1],
             )
             # append offer object
             offers.append(obj)

@@ -47,11 +47,7 @@ def administrative_areas() -> list[AdministrativeArea]:
 
 def administrative_units() -> list[AdministrativeArea]:
     """
-    Returns the leaf nodes of all administrative area trees.
-
-    This is useful because we often search the most precise address (e.g. districts)
-    instead of the less one (e.g. province). The latter will result in inefficient density
-    of useful data, and probably a performance downgrade.
+    Returns all nodes of all administrative area trees.
     """
     global _administrative_units
 
@@ -63,8 +59,7 @@ def administrative_units() -> list[AdministrativeArea]:
             if element.children:
                 for child in element.children:
                     queue.append(child)
-            else:
-                result.append(element)
+            result.append(element)
         _administrative_units = result
     return _administrative_units
 
@@ -107,6 +102,6 @@ def _search(addr: str, area: AdministrativeArea) -> list[str] | None:
         childresult = _search(addr, child)
         if childresult:  # matches the first child that appears in addr.
             return [area.name, *childresult]
-    if area.address in addr:
+    if area.address.lower() in addr:
         return [area.name]
     return None

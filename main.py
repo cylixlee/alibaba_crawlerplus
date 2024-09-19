@@ -192,6 +192,9 @@ def main() -> None:
     Additionally, the `main()` function should not receive any arguments. Startup
     arguments should be written in configuration files.
     """
+    if not CACHE_DIR.exists():
+        CACHE_DIR.mkdir(parents=True)
+
     requesthub = SleepyRequestHub(
         request_interval=timedelta(seconds=3),
         min_sleep=timedelta(seconds=225),

@@ -1,15 +1,12 @@
 administrative-area:
-  - address: "taizhou"
-    name: "泰州市"
+  - address: "suqian"
+    name: "宿迁市"
     children:
-      - { address: "suqian", name: "经济开发区" }
-      - { address: "economic", name: "经济开发区" }
-      - { address: "hailing", name: "海陵区" }
-      - { address: "gaogang", name: "高港区" }
-      - { address: "jiangyan", name: "姜堰区" }
-      - { address: "xinghua", name: "兴化市" }
-      - { address: "jingjiang", name: "靖江市" }
-      - { address: "taixing", name: "泰兴市" }
+      - { address: "sucheng", name: "宿城区" }
+      - { address: "suyu", name: "宿豫区" }
+      - { address: "shuyang", name: "沭阳县" }
+      - { address: "siyang", name: "泗阳县" }
+      - { address: "sihong", name: "泗洪县" }
 
 disguise-headers:
   Referer: "https://onetalk.alibaba.com/"
@@ -17,10 +14,11 @@ disguise-headers:
   Sec-Ch-Ua-Mobile: "?0"
   Sec-Ch-Ua-Platform: '"Windows"'
   User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0"
-  Cookie: "ali_apache_id=33.102.195.127.1726301220921.401634.5; cna=JTJsH/uvk2UCAXAEsdIbziUK; t=cbd56c20b81c1fdd2657c81f71fb4f99; xman_us_f=x_l=1; xlly_s=1; xman_f=rzJPZe36A5rJIT8lnaCRb2fBfbzWR0NV2D8v+g9QWTxShv+U4fuBSBpj/E8td1lWYCvPx2u7XvAEVGqqQIrcrQKx45G3lVEHGhnLHbeD38NiK99J09VTmw==; ali_apache_track=; NWG=NNW; acs_usuc_t=acs_rt=b5b75e40229f44ebb2d67aca64101993; xman_t=SCU4gEv9RzErFP9WexWSgmnSXN1D7T9vEGf0H+pvz65GUD645IYF04GMqqycFFnI; cookie2=15a01e7b12248a6792f58a7c46f39c9f; icbu_s_tag=9_11; _tb_token_=e3034788e71e7; _samesite_flag_=true; _m_h5_tk=f67792cb22a2c258b9e9977c0d8c0f02_1726653861467; _m_h5_tk_enc=c05099f15e596e73f7746bfc402a2e66; isg=BIWF-WIRT-6MCWu9s9xstmyElMG_QjnUBoBzCofqyrzLHqWQTpZJpWE9KELoXlGM; ug_se_c=organic_1726644144267; tfstk=fvGIeI00FMjILYJehaLahnyhmgFSA0O4eaa-o4CFyWFdVTg-lwkEyeDSC0ot8UvHE7Ms2c2UvHVEN4nrbw-3a8o5FDotL8hz4bT7tfkFak-3N4n4Nn-2gIun-WVJ0nkKyWpYwzdz2PvouMFuwn-aexlp77mquHrtwVL_zzWRw0UdBVEgP6U-2keOXra0w7F-2RCTrrBRv7ULXNEgy7E-27h0YZaWdk0BSsC2T98UR2E1N2c_JJ6nJl1RwfM_doF4f_C-1ygG_SL1GLrxnky4DcdNO7gTPcwqdn1IV43meRG5veoxXYi8SAx5FoM-8xcgQaBK5bZQHXe1k_uYtzn8FAxfgyNEC-GIKUjtJmrIHW0PlHu_hAw0WRQ5pWkqub2x9Bs0b-4Sf-kBc6iA43f4cpBdFNwcNPZ25F6lEdGIESnYYDrbpP4QQFT1vY2LSPZW5F6kVJUg7O865MaP."
 
-captcha-detect:
-  landmarks: ["_config_", "captcha", "punish"]
+captcha:
+  slider: '//*[@id="nc_1_n1z"]'
+  min-slide-width: 320
+  max-slide-width: 450
 
 json-parser:
   landmark: "_PAGE_DATA_"

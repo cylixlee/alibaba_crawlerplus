@@ -25,6 +25,8 @@ COMPLETE_COLUMNS = [
 
 
 def main() -> None:
+    if not SHEET_DIR.exists():
+        SHEET_DIR.mkdir(parents=True)
     cache_path = CACHE_DIR / "details.pickle"
     cache = DetailsCrawler.load(cache_path, None)
     for area, details in cache._details.items():
@@ -60,8 +62,16 @@ def _write_area(area: AdministrativeArea, details: list[AlibabaCompanyDetail]) -
             detail.bill,
             detail.provided_products,
         ]
-    sheet.reindex(COMPLETE_COLUMNS)
-    sheet.to_excel(SHEET_DIR / f"{area.name}.xlsx")
+    for index, column in enumerate(COMPLETE_COLUMNS):
+        if column not in sheet.columns:
+            match column:
+                case "币种\n(币种代码)":
+                    sheet.insert(index, column, "美元")
+                case "平台名称\n(数据来源平台名称)":
+                    sheet.insert(index, column, "阿里巴巴国际站")
+                case _:
+                    sheet.insert(index, column, "")
+    sheet.to_excel(SHEET_DIR / f"{area.name}.xlsx", index=False)
 
 
 if __name__ == "__main__":

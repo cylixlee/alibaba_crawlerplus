@@ -4,6 +4,8 @@ INSPECT_DIR = PROJECT_DIR / "inspect"
 
 
 def _main():
+    if not INSPECT_DIR.exists():
+        INSPECT_DIR.mkdir(parents=True)
     with open(INSPECT_DIR / "offers.txt", "w", encoding="utf8") as f:
         crawler = OffersCrawler.load(CACHE_DIR / "offers.pickle")
         for area, offers in crawler._offers.items():

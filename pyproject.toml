@@ -1,7 +1,7 @@
 [tool.poetry]
 package-mode = false
 name = "alibaba-crawlerplus"
-version = "1.0.0"
+version = "1.1.0"
 description = "Crawler project inherited from postgraduate seniors."
 authors = ["Cylix Lee <cylix.lee@outlook.com>"]
 license = "Apache License 2.0"
