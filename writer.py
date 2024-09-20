@@ -52,13 +52,34 @@ def write_area(area: AdministrativeArea, details: list[AlibabaCompanyDetail]) ->
             "经营范围",
         ]
     )
+    filtered_sheet = pd.DataFrame(
+        columns=[
+            "营业单位\n(中文名称)",
+            "店铺名称",
+            "市",
+            "区县",
+            "销售额",
+            "经营范围",
+        ]
+    )
     for detail in details:
+        if "US" not in detail.bill:
+            detail.bill = ""
+
         if detail.administrative_address:
             city = detail.administrative_address[0]
             if len(detail.administrative_address) > 1:
                 district = detail.administrative_address[1]
             else:
                 district = ""
+            filtered_sheet.loc[len(filtered_sheet)] = [
+                detail.name,
+                detail.domain,
+                city,
+                district,
+                detail.bill,
+                detail.provided_products,
+            ]
         else:
             city = ""
             district = ""
@@ -75,11 +96,15 @@ def write_area(area: AdministrativeArea, details: list[AlibabaCompanyDetail]) ->
             match column:
                 case "币种\n(币种代码)":
                     sheet.insert(index, column, "美元")
+                    filtered_sheet.insert(index, column, "美元")
                 case "平台名称\n(数据来源平台名称)":
                     sheet.insert(index, column, "阿里巴巴国际站")
+                    filtered_sheet.insert(index, column, "阿里巴巴国际站")
                 case _:
                     sheet.insert(index, column, "")
+                    filtered_sheet.insert(index, column, "")
     sheet.to_excel(SHEET_DIR / f"{area.name}.xlsx", index=False)
+    filtered_sheet.to_excel(SHEET_DIR / f"{area.name} - 数据筛选.xlsx", index=False)
 
 
 if __name__ == "__main__":
