@@ -43,6 +43,9 @@ class AlibabaDetailPageBrowser(AbstractInteractiveBrowser):
         # open detail page
         self._driver.get(offer.detail_url)
         while self._driver.current_url != offer.detail_url:
+            # error detection
+            if "error" in self._driver.current_url:
+                return AlibabaCompanyDetail("", "", "", "", None, "")
             # captcha detection
             if "captcha" in self._driver.page_source:
                 print("(de-captcha) waiting for manual verification")
