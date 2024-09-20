@@ -210,6 +210,7 @@ def main() -> None:
         offers_crawler._requesthub = requesthub
     else:
         offers_crawler = OffersCrawler(offers_cache_path, requesthub=requesthub)
+    offers_crawler._cache_path = offers_cache_path
     offers = offers_crawler.crawl()
 
     options = EdgeOptions()
@@ -238,6 +239,7 @@ def main() -> None:
             details_crawler = DetailsCrawler.load(details_cache_path, driver)
         else:
             details_crawler = DetailsCrawler(details_cache_path, offers, driver=driver)
+        details_crawler._cache_path = details_cache_path
         details_crawler.crawl()
 
 

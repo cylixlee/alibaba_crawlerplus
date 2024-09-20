@@ -46,9 +46,9 @@ class AlibabaDetailPageBrowser(AbstractInteractiveBrowser):
             # captcha detection
             if "captcha" in self._driver.page_source:
                 print("(de-captcha) waiting for manual verification")
-                time.sleep(15)
+                time.sleep(5)
             # wait for the browser to get prepared
-            time.sleep(3)
+            time.sleep(1)
 
         # find bill, or set to an empty string
         bill = self._xpath_of(CONFIG["xpath"]["bill"])
