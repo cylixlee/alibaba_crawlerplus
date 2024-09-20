@@ -29,10 +29,10 @@ CACHE_DIR = PROJECT_DIR / "cache"
 class OffersCrawler(DefaultResumableState):
     def __init__(self, path: pathlib.Path, *, requesthub: AbstractRequestHub) -> None:
         super().__init__(path)
-        self._offers: dict[AdministrativeArea, list[AlibabaCompanyOffer]] = {}
-        self._pages: dict[AdministrativeArea, int] = {}
-        self._completed: set[AdministrativeArea] = set()
-        self._requesthub = requesthub
+        self.offers: dict[AdministrativeArea, list[AlibabaCompanyOffer]] = {}
+        self.pages: dict[AdministrativeArea, int] = {}
+        self.completed: set[AdministrativeArea] = set()
+        self.requesthub = requesthub
 
     def crawl(self) -> dict[AdministrativeArea, list[AlibabaCompanyOffer]]:
         for unit in administrative_units():
@@ -42,54 +42,54 @@ class OffersCrawler(DefaultResumableState):
             # result; otherwise, incremental crawling is performed.
             #
             # This saves a lot of duplicate work and makes this task resumable.
-            if unit not in self._completed:
+            if unit not in self.completed:
                 print(f"crawling area {unit.name} ({unit.address})")
-                self._crawl_area(unit)
+                self.crawl_area(unit)
             else:
                 print(f"(offers) area {unit.name} ({unit.address}) clear (cached).")
-        return self._offers
+        return self.offers
 
     @transaction
-    def _crawl_area(self, area: AdministrativeArea) -> None:
+    def crawl_area(self, area: AdministrativeArea) -> None:
         parser = ComposeParser(
             AlibabaPageJsonParser(),
             AlibabaJsonOffersParser(),
         )
 
-        if area not in self._pages.keys():
+        if area not in self.pages.keys():
             print("=== starting from page 1 ===")
-            self._pages[area] = 1
+            self.pages[area] = 1
         else:
-            print(f"=== continue from page {self._pages[area]} ===")
+            print(f"=== continue from page {self.pages[area]} ===")
 
         while True:
             url = AlibabaSearchUrl(
                 area.address,
                 tab=AlibabaSearchTab.Suppliers,
                 country=AlibabaSupplierCountry.China,
-                page=self._pages[area],
+                page=self.pages[area],
             )
-            content = self._requesthub.request(url)
+            content = self.requesthub.request(url)
             offers: list[AlibabaCompanyOffer] = parser.parse(content)
             if not offers:
                 break
 
             print(f"crawled {len(offers)} offers (from {url})...")
-            self._pages[area] += 1
-            self._save_offers(area, offers)
-        self._completed.add(area)
+            self.pages[area] += 1
+            self.save_offers(area, offers)
+        self.completed.add(area)
 
     @transaction
-    def _save_offers(
+    def save_offers(
         self,
         area: AdministrativeArea,
         offers: list[AlibabaCompanyOffer],
     ) -> None:
-        if area not in self._offers.keys():
+        if area not in self.offers.keys():
             print(f"creating new offerlist of {area.name} ({area.address})")
-            self._offers[area] = offers
+            self.offers[area] = offers
         else:
-            self._offers[area].extend(offers)
+            self.offers[area].extend(offers)
 
 
 class DetailsCrawler(AbstractResumableState):
@@ -99,27 +99,18 @@ class DetailsCrawler(AbstractResumableState):
         instance = DetailsCrawler(None, None, driver=driver)
         with open(path, "rb") as f:
             (
-                instance._cache_path,
-                instance._offers,
-                instance._details,
-                instance._indices,
-                instance._completed,
+                instance.offers,
+                instance.details,
+                instance.indices,
+                instance.completed,
             ) = pickle.load(f)
+        instance.cache_path = path
         return instance
 
     @override
     def store(self) -> None:
-        with open(self._cache_path, "wb") as f:
-            pickle.dump(
-                (
-                    self._cache_path,
-                    self._offers,
-                    self._details,
-                    self._indices,
-                    self._completed,
-                ),
-                f,
-            )
+        with open(self.cache_path, "wb") as f:
+            pickle.dump((self.offers, self.details, self.indices, self.completed), f)
 
     def __init__(
         self,
@@ -128,52 +119,52 @@ class DetailsCrawler(AbstractResumableState):
         *,
         driver: Remote,
     ) -> None:
-        self._cache_path = path
-        self._offers = offers
-        self._details: dict[AdministrativeArea, list[AlibabaCompanyDetail]] = {}
-        self._indices: dict[AdministrativeArea, int] = {}
-        self._completed: set[AdministrativeArea] = set()
-        self._browser = AlibabaDetailPageBrowser(driver)
+        self.cache_path = path
+        self.offers = offers
+        self.details: dict[AdministrativeArea, list[AlibabaCompanyDetail]] = {}
+        self.indices: dict[AdministrativeArea, int] = {}
+        self.completed: set[AdministrativeArea] = set()
+        self.browser = AlibabaDetailPageBrowser(driver)
 
     def crawl(self) -> dict[AdministrativeArea, list[AlibabaCompanyDetail]]:
-        for area, offers in self._offers.items():
-            if area not in self._completed:
-                self._crawl_area(area, offers)
+        for area, offers in self.offers.items():
+            if area not in self.completed:
+                self.crawl_area(area, offers)
             else:
                 print(f"(detail) area {area.name} ({area.address}) clear (cached).")
-        return self._details
+        return self.details
 
     @transaction
-    def _crawl_area(
+    def crawl_area(
         self,
         area: AdministrativeArea,
         offers: list[AlibabaCompanyOffer],
     ) -> None:
-        if area not in self._indices.keys():
-            self._indices[area] = 0
-            print(f"=== starting from index {self._indices[area]} ===")
+        if area not in self.indices.keys():
+            self.indices[area] = 0
+            print(f"=== starting from index {self.indices[area]} ===")
         else:
-            print(f"=== continue from index {self._indices[area]} ===")
+            print(f"=== continue from index {self.indices[area]} ===")
 
-        while self._indices[area] < len(offers):
-            offer = offers[self._indices[area]]
-            print(f"crawling offer {self._indices[area]} from {offer.detail_url}")
-            self._crawl_detail(area, offer)
-        self._completed.add(area)
+        while self.indices[area] < len(offers):
+            offer = offers[self.indices[area]]
+            print(f"crawling offer {self.indices[area]} from {offer.detail_url}")
+            self.crawl_detail(area, offer)
+        self.completed.add(area)
 
     @transaction
-    def _crawl_detail(
+    def crawl_detail(
         self,
         area: AdministrativeArea,
         offer: AlibabaCompanyOffer,
     ) -> None:
-        detail = self._browser.perform(offer)
-        if area not in self._details:
+        detail = self.browser.perform(offer)
+        if area not in self.details:
             print(f"creating new detaillist of {area.name} ({area.address})")
-            self._details[area] = [detail]
+            self.details[area] = [detail]
         else:
-            self._details[area].append(detail)
-        self._indices[area] += 1
+            self.details[area].append(detail)
+        self.indices[area] += 1
 
 
 def main() -> None:
@@ -207,10 +198,9 @@ def main() -> None:
 
     if offers_cache_path.exists():
         offers_crawler = OffersCrawler.load(offers_cache_path)
-        offers_crawler._requesthub = requesthub
+        offers_crawler.requesthub = requesthub
     else:
         offers_crawler = OffersCrawler(offers_cache_path, requesthub=requesthub)
-    offers_crawler._cache_path = offers_cache_path
     offers = offers_crawler.crawl()
 
     options = EdgeOptions()
@@ -239,7 +229,6 @@ def main() -> None:
             details_crawler = DetailsCrawler.load(details_cache_path, driver)
         else:
             details_crawler = DetailsCrawler(details_cache_path, offers, driver=driver)
-        details_crawler._cache_path = details_cache_path
         details_crawler.crawl()
 
 

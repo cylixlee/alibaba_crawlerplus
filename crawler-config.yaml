@@ -1,26 +1,20 @@
 administrative-area:
-  - address: "suqian"
-    name: "宿迁市"
+  - address: "taizhou"
+    name: "泰州市"
     children:
-      - { address: "sucheng", name: "宿城区" }
-      - { address: "suyu", name: "宿豫区" }
-      - { address: "shuyang", name: "沭阳县" }
-      - { address: "siyang", name: "泗阳县" }
-      - { address: "sihong", name: "泗洪县" }
+      - { address: "jingjiang", name: "靖江市" }
+      - { address: "taixing", name: "泰兴市" }
+      - { address: "xinghua", name: "兴化市" }
+      - { address: "hailing", name: "海陵区" }
+      - { address: "gaogang", name: "高港区" }
+      - { address: "jiangyan", name: "姜堰区" }
 
 disguise-headers:
-  Referer: "https://onetalk.alibaba.com/"
+  # Referer: "https://onetalk.alibaba.com/"
   Sec-Ch-Ua: '"Chromium";v="128", "Not;A=Brand";v="24", "Microsoft Edge";v="128"'
   Sec-Ch-Ua-Mobile: "?0"
   Sec-Ch-Ua-Platform: '"Windows"'
   User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0"
-
-# captcha:
-#   slider: '//*[@id="nc_1_n1z"]'
-#   retry-button: '//*[@id="`nc_1_refresh1`"]'
-#   min-slide: 320
-#   max-slide: 450
-#   retry: 5
 
 json-parser:
   landmark: "_PAGE_DATA_"

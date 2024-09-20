@@ -91,7 +91,9 @@ class DefaultResumableState(AbstractResumableState):
     @override
     def load(cls, path: pathlib.Path) -> Self:
         with open(path, "rb") as f:
-            return pickle.load(f)
+            state: Self = pickle.load(f)
+            state._cache_path = path
+            return state
 
     @override
     def store(self) -> None:

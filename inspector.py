@@ -19,7 +19,7 @@ def main():
     # write offers.
     with open(INSPECT_DIR / "offers.txt", "w", encoding="utf8") as f:
         crawler = OffersCrawler.load(CACHE_DIR / "offers.pickle")
-        for area, offers in crawler._offers.items():
+        for area, offers in crawler.offers.items():
             print(f"area {area.name} ({area.address}) with {len(offers)} offers.")
             print(f"====== for area {area.name} ({area.address}) ======:", file=f)
             for offer in offers:
@@ -28,7 +28,7 @@ def main():
     # write details.
     with open(INSPECT_DIR / "details.txt", "w", encoding="utf8") as f:
         crawler = DetailsCrawler.load(CACHE_DIR / "details.pickle", None)
-        for area, details in crawler._details.items():
+        for area, details in crawler.details.items():
             print(f"area {area.name} ({area.address}) with {len(details)} details.")
             print(f"====== for area {area.name} ({area.address}) ======:", file=f)
             for detail in details:

@@ -37,7 +37,7 @@ def main() -> None:
         SHEET_DIR.mkdir(parents=True)
     cache_path = CACHE_DIR / "details.pickle"
     cache = DetailsCrawler.load(cache_path, None)
-    for area, details in cache._details.items():
+    for area, details in cache.details.items():
         write_area(area, details)
 
 
