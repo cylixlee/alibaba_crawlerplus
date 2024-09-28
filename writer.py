@@ -26,6 +26,7 @@ COMPLETE_COLUMNS = [
     "运输方式\n(运输方式代码)",
     "HS编码\n(10位商品编码)",
     "销售额",
+    "订单数",
     "币种\n(币种代码)",
     "平台名称\n(数据来源平台名称)",
     "经营范围",
@@ -49,6 +50,7 @@ def write_area(area: AdministrativeArea, details: list[AlibabaCompanyDetail]) ->
             "市",
             "区县",
             "销售额",
+            "订单数",
             "经营范围",
         ]
     )
@@ -59,6 +61,7 @@ def write_area(area: AdministrativeArea, details: list[AlibabaCompanyDetail]) ->
             "市",
             "区县",
             "销售额",
+            "订单数",
             "经营范围",
         ]
     )
@@ -78,6 +81,7 @@ def write_area(area: AdministrativeArea, details: list[AlibabaCompanyDetail]) ->
                 city,
                 district,
                 detail.bill,
+                detail.orders,
                 detail.provided_products,
             ]
         else:
@@ -89,6 +93,7 @@ def write_area(area: AdministrativeArea, details: list[AlibabaCompanyDetail]) ->
             city,
             district,
             detail.bill,
+            detail.orders,
             detail.provided_products,
         ]
     for index, column in enumerate(COMPLETE_COLUMNS):

@@ -45,7 +45,7 @@ class AlibabaDetailPageBrowser(AbstractInteractiveBrowser):
         while self._driver.current_url != offer.detail_url:
             # error detection
             if "error" in self._driver.current_url:
-                return AlibabaCompanyDetail("", "", "", "", None, "")
+                return AlibabaCompanyDetail("", "", "", "", None, "", "")
             # captcha detection
             if "captcha" in self._driver.page_source:
                 print("(de-captcha) waiting for manual verification")
@@ -67,9 +67,17 @@ class AlibabaDetailPageBrowser(AbstractInteractiveBrowser):
         else:
             address = None
 
+        # find orders
+        orders = self._xpath_of(CONFIG["xpath"]["orders"])
+        if orders:
+            orders = orders.text
+        else:
+            orders = ""
+
         return AlibabaCompanyDetail(
             bill=bill,
             administrative_address=address,
+            orders=orders,
             **asdict(offer),
         )
 

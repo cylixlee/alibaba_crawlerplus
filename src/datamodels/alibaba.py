@@ -25,9 +25,9 @@ class AlibabaCompanyDetail(AlibabaCompanyOffer):
     A more detailed information of a certain company on Alibaba.
 
     We can navigate to the :field:`detail_url` of :class:`AlibabaCompanyOffer`s, which
-    will open the detail page of a company. Currently, we just collect the administrative
-    address and bill flow of the company from this page.
+    will open the detail page of a company.
     """
 
     administrative_address: list[str] | None
     bill: str
+    orders: str
