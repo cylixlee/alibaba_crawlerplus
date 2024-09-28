@@ -29,10 +29,10 @@ chrome-driver:
         })
 
 json-parser:
-  landmark: "_PAGE_DATA_"
-  prefix: "window._PAGE_DATA_ = {"
-  suffix: "};"
-  offer-list-path: ["offerResultData", "offerList"]
+  landmark: "__search_results__"
+  prefix: "window.__search_results__ =  {"
+  suffix: "} ;"
+  offer-list-path: ["body", "moduleList"]
   offer-template:
     detail-url: "action"
     name: "companyName"

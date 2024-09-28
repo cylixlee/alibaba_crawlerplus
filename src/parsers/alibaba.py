@@ -80,11 +80,19 @@ class AlibabaJsonOffersParser(AbstractDataParser):
 
         # iterate over JSON list and parse `AlibabaCompanyOffer`s out.
         for offer in offerlist:
+            offer = offer["data"]
+
             # detail url need to be added with "https" scheme
             detail_url = "https:" + offer[template["detail-url"]]
+
+            # name now may include HTML/XML.
+            name: str = offer[template["name"]]
+            if "<" in name and ">" in name:
+                name = name.split(">")[-1].strip()
+
             obj = AlibabaCompanyOffer(
                 detail_url=detail_url,
-                name=offer[template["name"]],
+                name=name,
                 provided_products=offer[template["provided-products"]],
                 # domain need to be parsed out
                 domain=detail_url.split(".")[0].split("//")[1],

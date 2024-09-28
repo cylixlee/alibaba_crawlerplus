@@ -1,8 +1,10 @@
+import json
 import pathlib
 import pickle
 from datetime import timedelta
 from typing import Self, override
 
+from fake_useragent import UserAgent
 from selenium.webdriver import Chrome, ChromeOptions, ChromeService, Remote
 
 from src.conf import CONFIG
@@ -24,6 +26,7 @@ from src.urls import AlibabaSearchTab, AlibabaSearchUrl, AlibabaSupplierCountry
 
 PROJECT_DIR = pathlib.Path(__file__).parent
 CACHE_DIR = PROJECT_DIR / "cache"
+SAMPLE_DIR = PROJECT_DIR / "sample"
 
 
 class OffersCrawler(DefaultResumableState):
@@ -203,12 +206,15 @@ def main() -> None:
         offers_crawler = OffersCrawler(offers_cache_path, requesthub=requesthub)
     offers = offers_crawler.crawl()
 
+    ua = UserAgent()
+
     # configure chrome options
     options = ChromeOptions()
     for argument in CONFIG["chrome-driver"]["options"]:
         options.add_argument(argument)
     for name, value in CONFIG["chrome-driver"]["experimental-options"].items():
         options.add_experimental_option(name, value)
+    options.add_argument(f"user-agent={ua.random}")
 
     # set chrome driver executable path and starts chrome
     service = ChromeService(executable_path=CONFIG["chrome-driver"]["path"])
@@ -225,9 +231,37 @@ def main() -> None:
         details_crawler.crawl()
 
 
+def sampling() -> None:
+    # if not SAMPLE_DIR.exists():
+    #     SAMPLE_DIR.mkdir(parents=True)
+    # ua = UserAgent()
+    # url = AlibabaSearchUrl(
+    #     "taizhou",
+    #     tab=AlibabaSearchTab.Suppliers,
+    #     country=AlibabaSupplierCountry.China,
+    # )
+    # page = requests.get(str(url), headers={"User-Agent": ua.random})
+    # with open(SAMPLE_DIR / "offers-sample.html", "w") as f:
+    #     print(page.text, file=f)
+
+    # parser = AlibabaPageJsonParser()
+    # with open(SAMPLE_DIR / "offers-sample.html") as f:
+    #     search_result = parser.parse(f.read())
+    # with open(SAMPLE_DIR / "json-sample.json", "w") as f:
+    #     json.dump(search_result, f)
+
+    parser = AlibabaJsonOffersParser()
+    with open(SAMPLE_DIR / "json-sample.json") as f:
+        data = json.load(f)
+        offers = parser.parse(data)
+        for offer in offers:
+            print(offer)
+
+
 # Guideline recommended Main Guard
 #
 # This is VERY necessary to both adopting ``if __name__ == "__main__"`` pattern and
 # self-defined ``main()`` function. About more detail, see :func:`main`.
 if __name__ == "__main__":
     main()
+    # sampling()
