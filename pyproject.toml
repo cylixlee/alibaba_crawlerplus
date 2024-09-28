@@ -1,7 +1,7 @@
 [tool.poetry]
 package-mode = false
 name = "alibaba-crawlerplus"
-version = "1.3.0"
+version = "1.4.0"
 description = "Crawler project inherited from postgraduate seniors."
 authors = ["Cylix Lee <cylix.lee@outlook.com>"]
 license = "Apache License 2.0"
@@ -16,6 +16,7 @@ tqdm = "^4.66.5"
 selenium = "^4.24.0"
 typing-extensions = "^4.12.2"
 pandas = {extras = ["excel"], version = "^2.2.2"}
+fake-useragent = "^1.5.1"
 
 
 [build-system]

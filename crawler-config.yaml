@@ -9,12 +9,24 @@ administrative-area:
       - { address: "gaogang", name: "高港区" }
       - { address: "jiangyan", name: "姜堰区" }
 
-disguise-headers:
-  # Referer: "https://onetalk.alibaba.com/"
-  Sec-Ch-Ua: '"Chromium";v="128", "Not;A=Brand";v="24", "Microsoft Edge";v="128"'
-  Sec-Ch-Ua-Mobile: "?0"
-  Sec-Ch-Ua-Platform: '"Windows"'
-  User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0"
+chrome-driver:
+  path: "D:/ProgramData/WebDrivers/Chrome/129.0.6668.58/chromedriver.exe"
+  options:
+    - "log-level=3"
+    - "--incognito"
+    - "--no-sandbox"
+    - "--disable-dev-shm-usage"
+    - "--disable-blink-features=AutomationControlled"
+  experimental-options:
+    "useAutomationExtension": false
+    "excludeSwitches": ["enable-automation"]
+    prefs: { "profile.default_content_setting_values": { "images": 2 } }
+  cdp-command:
+    "Page.addScriptToEvaluateOnNewDocument":
+      "source": >
+        Object.defineProperty(navigator, 'webdriver', {
+          get: () => undefined
+        })
 
 json-parser:
   landmark: "_PAGE_DATA_"

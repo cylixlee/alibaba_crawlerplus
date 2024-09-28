@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from typing import Callable, override
 
 import requests
+from fake_useragent import UserAgent
 
-from ..conf import CONFIG
 from ..exceptions import CaptchaException, RequestNotSuccessfulException
 from ..urls import AbstractUrl
 from .abstract import AbstractRequestHub
@@ -42,12 +42,12 @@ class DefaultRequestHub(AbstractRequestHub):
         self.request_interval = request_interval
         self.last_request_time = datetime.now()
         self.captcha_detector = captcha_detector
+        self.ua = UserAgent()
 
     @override
     def request(self, url: AbstractUrl | str) -> str:
         """
-        Sends a request to the specified URL. The configured ``disguise-headers`` are used
-        as request headers.
+        Sends a request to the specified URL.
 
         :param url: an instance of :class:`AbstractUrl`, or str representing the URL to
             send a GET request.
@@ -68,7 +68,7 @@ class DefaultRequestHub(AbstractRequestHub):
             response = requests.get(
                 url.baseurl(),
                 url.params(),
-                headers=CONFIG["disguise-headers"],
+                headers={"User-Agent": self.ua.random},
             )
         else:
             response = requests.get(url=url)

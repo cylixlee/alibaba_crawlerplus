@@ -3,7 +3,7 @@ import pickle
 from datetime import timedelta
 from typing import Self, override
 
-from selenium.webdriver import Edge, EdgeOptions, Remote
+from selenium.webdriver import Chrome, ChromeOptions, ChromeService, Remote
 
 from src.conf import CONFIG
 from src.datamodels import AdministrativeArea, AlibabaCompanyDetail, AlibabaCompanyOffer
@@ -203,28 +203,21 @@ def main() -> None:
         offers_crawler = OffersCrawler(offers_cache_path, requesthub=requesthub)
     offers = offers_crawler.crawl()
 
-    options = EdgeOptions()
-    options.add_argument("lang=zh_CN.UTF-8")
-    options.add_argument(f'User-Agent="{CONFIG["disguise-headers"]["User-Agent"]}"')
-    options.add_argument("--disable-gpu")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-popup-blocking")
-    options.add_argument("--hide-scrollbars")
-    options.add_experimental_option("excludeSwitches", ["enable-automation"])
-    options.add_experimental_option("useAutomationExtension", False)
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    with Edge(options) as driver:
-        driver.execute_cdp_cmd(
-            "Page.addScriptToEvaluateOnNewDocument",
-            {
-                "source": """
-                    Object.defineProperty(navigator, 'webdriver', {
-                        get: () => undefined
-                    })
-                """
-            },
-        )
+    # configure chrome options
+    options = ChromeOptions()
+    for argument in CONFIG["chrome-driver"]["options"]:
+        options.add_argument(argument)
+    for name, value in CONFIG["chrome-driver"]["experimental-options"].items():
+        options.add_experimental_option(name, value)
 
+    # set chrome driver executable path and starts chrome
+    service = ChromeService(executable_path=CONFIG["chrome-driver"]["path"])
+    with Chrome(options, service) as driver:
+        # execute Chrome DevTools Protocol commands.
+        for command in CONFIG["chrome-driver"]["cdp-command"]:
+            driver.execute_cdp_cmd(command)
+
+        # start crawler.
         if details_cache_path.exists():
             details_crawler = DetailsCrawler.load(details_cache_path, driver)
         else:
