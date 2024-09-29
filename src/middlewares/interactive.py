@@ -1,3 +1,7 @@
+import time
+
+from scrapy import Request, Spider
+from scrapy.http import HtmlResponse, Response
 from selenium.webdriver import Chrome, ChromeOptions, ChromeService, Remote
 
 from ..conf import CONFIG
@@ -15,6 +19,7 @@ class InteractiveCaptchaMiddleware(object):
     """
 
     driver: Remote
+    abnormal_state: bool = False
 
     def __init__(self) -> None:
         # add arguments and experimental options.
@@ -37,3 +42,47 @@ class InteractiveCaptchaMiddleware(object):
 
     def __del__(self) -> None:
         self.driver.quit()  # quits the driver.
+
+    def process_response(self, request: Request, response: Response, spider: Spider):
+        """
+        The core logic of this class.
+
+        When the response contains captcha features, Selenium is used to re-request the
+        URL, and get the correct response.
+        """
+        if _is_captcha(response.body):
+            return self._process_captcha(request.url)
+
+    def process_request(self, request: Request, spider: Spider):
+        """
+        Additional logic to reduce duplicate visit of one page.
+
+        When the captcha catch us, we set the flag :var:`abnormal_state` to ``True``; and
+        the next request is handled by Selenium directly. Without this logic, every
+        captcha page will be visited twice, which will increase the opportunity to be
+        captcha-ed.
+
+        :var:`abnormal_state` is set back to ``False`` when the Selenium does not
+        recognize any captcha features.
+        """
+        if self.abnormal_state:
+            return self._process_captcha(request.url)
+
+    def _process_captcha(self, url: str) -> Response:
+        self.driver.maximize_window()
+        self.driver.get(url)
+        while self.driver.current_url != url:
+            # detect whether the captcha has caught us
+            if _is_captcha(self.driver.page_source):
+                self.abnormal_state = True
+                print("(de-captcha) waiting for manual verification...")
+                time.sleep(5)
+            else:
+                self.abnormal_state = False
+            # wait for the browser to load
+            time.sleep(1)
+        return HtmlResponse(url=url, body=self.driver.page_source, encoding="utf8")
+
+
+def _is_captcha(page_source: str) -> bool:
+    return "captcha" in page_source
