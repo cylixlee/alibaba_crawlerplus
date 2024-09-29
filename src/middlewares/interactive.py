@@ -1,4 +1,5 @@
 import time
+import weakref
 
 from scrapy import Request, Spider
 from scrapy.http import HtmlResponse, Response
@@ -39,9 +40,7 @@ class InteractiveCaptchaMiddleware(object):
 
         # maximize window to get the page rendered correctly.
         self.driver.maximize_window()
-
-    def __del__(self) -> None:
-        self.driver.quit()  # quits the driver.
+        weakref.finalize(self, lambda d: d.quit(), self.driver)
 
     def process_response(self, request: Request, response: Response, spider: Spider):
         """
@@ -81,7 +80,7 @@ class InteractiveCaptchaMiddleware(object):
                 self.abnormal_state = False
             # wait for the browser to load
             time.sleep(1)
-        return HtmlResponse(url=url, body=self.driver.page_source, encoding="utf8")
+        return HtmlResponse(url=url, body=self.driver.page_source, encoding="utf-8")
 
 
 def _is_captcha(page_source: str) -> bool:
