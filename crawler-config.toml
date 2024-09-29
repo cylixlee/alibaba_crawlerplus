@@ -1,0 +1,55 @@
+# Administrative Area to search.
+#
+# This section is actually a tree structure, which is visited breadth-first to search
+# related information on Alibaba. The tree is visited bottom-up when locating the search
+# result.
+[[administrative-area]]
+address = "taizhou"
+name = "泰州市"
+
+[[administrative-area.children]]
+address = "jingjiang"
+name = "靖江市"
+
+[[administrative-area.children]]
+address = "taixing"
+name = "泰兴市"
+
+[[administrative-area.children]]
+address = "hailing"
+name = "海陵区"
+
+[[administrative-area.children]]
+address = "gaogang"
+name = "高港区"
+
+[[administrative-area.children]]
+address = "jiangyan"
+name = "姜堰区"
+
+# Chrome driver configuration.
+#
+# Selenium is used to manually or automatically pass the Captcha verification. When the
+# crawler detects Captcha in the current response, it starts Selenium to do so.
+#
+# NOTE: all parameters except `path` should be inspected carefully before changing their
+# values. They're inherited from seniors' code and I don't exacly know the reason.
+[chrome-driver]
+path = "D:/ProgramData/WebDrivers/Chrome/129.0.6668.58/chromedriver.exe"
+arguments = [
+    "log-level=3",
+    "--incognito",
+    "--no-sandbox",
+    "--disable-dev-shm-usage",
+    "--disable-blink-features=AutomationControlled",
+]
+
+[chrome-driver.experimental-options]
+"useAutomationExtension" = false
+"excludeSwitches" = ["enable-automation"]
+
+[chrome-driver.experimental-options.prefs]
+"profile.default_content_setting_values" = { "images" = 2 }
+
+[chrome-driver.cdp-command."Page.addScriptToEvaluateOnNewDocument"]
+"source" = "Object.defineProperty(navigator, 'webdriver', { get: () => undefined })"

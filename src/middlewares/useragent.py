@@ -3,6 +3,8 @@ from typing import ClassVar
 from fake_useragent import UserAgent
 from scrapy import Request, Spider
 
+__all__ = ["RandomUserAgentMiddleware"]
+
 
 class RandomUserAgentMiddleware(object):
     """
@@ -13,9 +15,6 @@ class RandomUserAgentMiddleware(object):
     """
 
     ua: ClassVar[UserAgent] = UserAgent(platforms="pc")
-
-    def __init__(self) -> None:
-        print("RandomUA ready")
 
     def process_request(self, request: Request, spider: Spider):
         request.headers["User-Agent"] = __class__.ua.random
