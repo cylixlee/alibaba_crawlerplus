@@ -13,7 +13,7 @@ SPIDER_MODULES = ["src.spiders"]
 NEWSPIDER_MODULE = "src.spiders"
 
 
-# Obey robots.txt rules
+# Never obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
 CONCURRENT_REQUESTS = 1

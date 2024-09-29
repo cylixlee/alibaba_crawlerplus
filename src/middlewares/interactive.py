@@ -17,6 +17,9 @@ class InteractiveCaptchaMiddleware(object):
 
     Currently, Selenium is adopted to do so. When a captcha page is encountered, this
     middleware controls the browser driver to show the captcha page and verify.
+
+    NOTE: This middleware needs the scrapy to be non-concurrent, because we cannot operate
+    multiple browser tabs concurrently (for humans and Selenium).
     """
 
     driver: Remote
@@ -30,7 +33,7 @@ class InteractiveCaptchaMiddleware(object):
         for name, value in CONFIG["chrome-driver"]["experimental-options"].items():
             options.add_experimental_option(name, value)
 
-        # create chrome driver and execute Chrome DevTools Protocol
+        # create chrome driver and execute Chrome DevTools Protocol (CDP) command
         #
         # which is possibly some magic script to bypass target sites' crawler check.
         service = ChromeService(executable_path=CONFIG["chrome-driver"]["path"])
