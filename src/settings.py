@@ -23,7 +23,7 @@ DOWNLOAD_DELAY = 3
 
 DOWNLOADER_MIDDLEWARES = {
     "src.middlewares.RandomUserAgentMiddleware": 543,
-    "src.middlewares.InteractiveCaptchaMiddleware": 553,
+    "src.middlewares.InteractiveMiddleware": 553,
 }
 
 ITEM_PIPELINES = {

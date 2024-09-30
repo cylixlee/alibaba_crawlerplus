@@ -2,28 +2,25 @@ import time
 import weakref
 
 from scrapy import Request, Spider
-from scrapy.http import HtmlResponse, Response
+from scrapy.http import HtmlResponse
 from selenium.webdriver import Chrome, ChromeOptions, ChromeService, Remote
 
 from ..conf import CONFIG
 
-__all__ = ["InteractiveCaptchaMiddleware"]
+__all__ = ["InteractiveMiddleware"]
 
 
-class InteractiveCaptchaMiddleware(object):
+class InteractiveMiddleware(object):
     """
-    Interactively handles captcha pages (manually or automatically), and returns the
-    desired page to the engine.
+    Interactively opens requested pages and returns the desired page to the engine.
 
-    Currently, Selenium is adopted to do so. When a captcha page is encountered, this
-    middleware controls the browser driver to show the captcha page and verify.
+    Currently, Selenium is adopted to do so.
 
     NOTE: This middleware needs the scrapy to be non-concurrent, because we cannot operate
     multiple browser tabs concurrently (for humans and Selenium).
     """
 
     driver: Remote
-    abnormal_state: bool = False
 
     def __init__(self) -> None:
         # add arguments and experimental options.
@@ -41,53 +38,21 @@ class InteractiveCaptchaMiddleware(object):
         for cmd, args in CONFIG["chrome-driver"]["cdp-command"].items():
             self.driver.execute_cdp_cmd(cmd, args)
 
+        # implicitly waits for dynamically rendered elements.
+        self.driver.implicitly_wait(5)
         # maximize window to get the page rendered correctly.
         self.driver.maximize_window()
         weakref.finalize(self, lambda d: d.quit(), self.driver)
 
-    def process_response(self, request: Request, response: Response, spider: Spider):
-        """
-        The core logic of this class.
-
-        When the response contains captcha features, Selenium is used to re-request the
-        URL, and get the correct response.
-        """
-        if _is_captcha(response.body):
-            return self._process_captcha(request.url)
-        return response
-
     def process_request(self, request: Request, spider: Spider):
-        """
-        Additional logic to reduce duplicate visit of one page.
-
-        When the captcha catch us, we set the flag :var:`abnormal_state` to ``True``; and
-        the next request is handled by Selenium directly. Without this logic, every
-        captcha page will be visited twice, which will increase the opportunity to be
-        captcha-ed.
-
-        :var:`abnormal_state` is set back to ``False`` when the Selenium does not
-        recognize any captcha features.
-        """
-        if self.abnormal_state:
-            return self._process_captcha(request.url)
-
-    def _process_captcha(self, url: str) -> Response:
         self.driver.maximize_window()
-        self.driver.get(url)
-        while self.driver.current_url != url:
-            # detect whether the captcha has caught us
-            if _is_captcha(self.driver.page_source):
-                self.abnormal_state = True
-                print("(de-captcha) waiting for manual verification...")
-                time.sleep(5)
-            else:
-                self.abnormal_state = False
-            # wait for the browser to load
-            time.sleep(1)
-        return HtmlResponse(url=url, body=self.driver.page_source, encoding="utf-8")
-
-
-def _is_captcha(page_source: str | bytes) -> bool:
-    if isinstance(page_source, bytes):
-        page_source = page_source.decode()
-    return "captcha" in page_source
+        self.driver.get(request.url)
+        # detect whether the captcha has caught us
+        while "punish" in self.driver.current_url:
+            print("(de-captcha) waiting for manual verification...")
+            time.sleep(5)
+        return HtmlResponse(
+            url=request.url,
+            body=self.driver.page_source,
+            encoding="utf-8",
+        )

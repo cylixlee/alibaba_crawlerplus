@@ -59,8 +59,8 @@ arguments = [
 # In V2, we abandoned seeking and parsing JSON to deserialize the suppliers' data. We use
 # XPaths to extract them from the page elements, not the page source.
 [xpath.catalog]
-card = '//*[@id="root"]/div/section[3]/div[2]/div'
+card = '//div[@class="factory-card"]'
 detail-url = 'div[1]/div[1]/div[2]/h3/a/@href'
 name = 'div[1]/div[1]/div[2]/h3/a/text()'
 products = 'div[2]/div[1]/div/div/strong[2]/text()'
-next-page-link = '//*[@id="root"]/div/div[1]/div/a[2]/@href' # single element
+next-page-link = '//div[@class="searchx-pagination"]/a[2]/@href' # single element

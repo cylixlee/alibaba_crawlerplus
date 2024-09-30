@@ -1,7 +1,6 @@
 from typing import Iterable
 
 from scrapy import Request, Spider
-from scrapy.exceptions import DropItem
 from scrapy.http import Response
 
 from ..conf import CONFIG
@@ -38,6 +37,11 @@ class CatalogSpider(Spider):
                 break
         assert area is not None, "unrecognized area"
 
+        # checks if there's next page
+        next_page = response.xpath(xpaths["next-page-link"]).extract_first()
+        if next_page:
+            yield Request(url="https://alibaba.com" + next_page)
+
         # every card contains some information about the supplier
         cards = response.xpath(xpaths["card"])
         for card in cards:
@@ -45,10 +49,10 @@ class CatalogSpider(Spider):
             name = card.xpath(xpaths["name"]).extract_first()
             products = card.xpath(xpaths["products"]).extract_first()  # may be None
 
-            # validate data, set products to an empty string if None
-            if not detail_url and not name:
-                raise DropItem()
-            if not products:
+            # validate data
+            if detail_url is None or name is None:
+                continue
+            if products is None:
                 products = ""
 
             domain = detail_url.split(".")[0].split("/")[-1]  # the last domain name
@@ -62,8 +66,3 @@ class CatalogSpider(Spider):
                     "area": area,
                 }
             )
-
-        # checks if there's next page
-        next_page = response.xpath(xpaths["next-page-link"]).extract_first()
-        if next_page:
-            yield Request(url="https://alibaba.com" + next_page)
