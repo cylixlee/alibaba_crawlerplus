@@ -5,7 +5,7 @@ from scrapy.http import Response
 
 from ..conf import CONFIG
 from ..items import CatalogItem
-from ..util import administrative_nodes, alibaba_search_url
+from ..util import AdministrativeArea, administrative_nodes, alibaba_search_url
 
 __all__ = ["CatalogSpider"]
 
@@ -29,6 +29,14 @@ class CatalogSpider(Spider):
     def parse(self, response: Response):
         xpaths: dict[str, str] = CONFIG["xpath"]["catalog"]
 
+        # decide area
+        area: AdministrativeArea = None
+        for node in administrative_nodes():
+            if node.address.lower() in response.request.url.lower():
+                area = node
+                break
+        assert area is not None, "unrecognized area"
+
         # every card contains some information about the supplier
         cards = response.xpath(xpaths["card"])
         for card in cards:
@@ -49,10 +57,11 @@ class CatalogSpider(Spider):
                     "domain": domain,
                     "name": name,
                     "provided_products": products,
+                    "area": area,
                 }
             )
 
         # checks if there's next page
         next_page = response.xpath(xpaths["next-page-link"]).extract_first()
         if next_page:
-            yield Request(url=next_page)
+            yield Request(url="https://alibaba.com" + next_page)

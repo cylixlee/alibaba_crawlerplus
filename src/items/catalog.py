@@ -1,6 +1,25 @@
+from dataclasses import dataclass
+
 from scrapy import Field, Item
 
-__all__ = ["CatalogItem"]
+__all__ = ["Catalog", "CatalogItem"]
+
+
+@dataclass
+class Catalog(object):
+    detail_url: str
+    domain: str
+    name: str
+    provided_products: str
+
+    @classmethod
+    def from_item(cls, item: "CatalogItem") -> "Catalog":
+        return Catalog(
+            item["detail_url"],
+            item["domain"],
+            item["name"],
+            item["provided_products"],
+        )
 
 
 class CatalogItem(Item):
@@ -15,6 +34,10 @@ class CatalogItem(Item):
     - :field:`name`: The full name of the supplier.
     - :field:`provided_products`: The business range of the supplier.
 
+    and one additional field used to distinguish:
+
+    - :field:`area`: The area this item belongs to.
+
     all of which are of type :type:`str`.
     """
 
@@ -22,3 +45,4 @@ class CatalogItem(Item):
     domain = Field()
     name = Field()
     provided_products = Field()
+    area = Field()
