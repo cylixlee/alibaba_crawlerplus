@@ -30,7 +30,7 @@ class CatalogSpider(Spider):
         xpaths: dict[str, str] = CONFIG["xpath"]["catalog"]
 
         # every card contains some information about the supplier
-        cards = response.xpath(xpaths["card"]).extract()
+        cards = response.xpath(xpaths["card"])
         for card in cards:
             detail_url = card.xpath(xpaths["detail-url"]).extract_first()
             name = card.xpath(xpaths["name"]).extract_first()

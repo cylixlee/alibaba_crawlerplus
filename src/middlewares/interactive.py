@@ -38,7 +38,7 @@ class InteractiveCaptchaMiddleware(object):
         # which is possibly some magic script to bypass target sites' crawler check.
         service = ChromeService(executable_path=CONFIG["chrome-driver"]["path"])
         self.driver = Chrome(options, service)
-        for cmd, args in CONFIG["chrome-driver"]["cdp-command"]:
+        for cmd, args in CONFIG["chrome-driver"]["cdp-command"].items():
             self.driver.execute_cdp_cmd(cmd, args)
 
         # maximize window to get the page rendered correctly.
@@ -86,5 +86,7 @@ class InteractiveCaptchaMiddleware(object):
         return HtmlResponse(url=url, body=self.driver.page_source, encoding="utf-8")
 
 
-def _is_captcha(page_source: str) -> bool:
+def _is_captcha(page_source: str | bytes) -> bool:
+    if isinstance(page_source, bytes):
+        page_source = page_source.decode()
     return "captcha" in page_source

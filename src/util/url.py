@@ -1,5 +1,4 @@
 from enum import StrEnum
-from typing import Iterable
 from urllib.parse import urlencode
 
 __all__ = ["AlibabaSearchTab", "AlibabaSupplierCountry", "alibaba_search_url"]
@@ -65,11 +64,10 @@ def alibaba_search_url(
     params: dict[str, str] = {"SearchText": text, "tab": tab}
 
     # country can be specified
+    #
+    # in this project we probably don't need multi-country selection.
     if country is not None:
-        if isinstance(country, Iterable):
-            params["country"] = ",".join(country)
-        else:
-            params["country"] = country
+        params["country"] = country
 
     # page can be specified
     if page is not None:

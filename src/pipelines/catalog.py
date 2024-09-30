@@ -1,6 +1,4 @@
 import pickle
-import weakref
-from io import TextIOWrapper
 
 from scrapy import Item, Spider
 
@@ -12,17 +10,7 @@ __all__ = ["CatalogItemPipeline"]
 
 class CatalogItemPipeline(object):
     cache_path = CACHE_DIR / "catalogs.pickle"
-    items: list[CatalogItem]
-    _file: TextIOWrapper
-    _finalizer: weakref.finalize
-
-    def open_spider(self, spider: Spider):
-        self.items = []
-        self._file = open(self.cache_path, "wb")
-        self._finalizer = weakref.finalize(self, lambda f: f.close(), self._file)
-
-    def close_spider(self, spider: Spider):
-        self._finalizer()
+    items: list[CatalogItem] = []
 
     def process_item(self, item: Item, spider: Spider) -> Item:
         if not isinstance(item, CatalogItem):
@@ -32,4 +20,5 @@ class CatalogItemPipeline(object):
 
     def _synchronize(self, item: CatalogItem) -> None:
         self.items.append(item)
-        pickle.dump(self.items, self._file)
+        with open(self.cache_path, "wb") as f:
+            pickle.dump(self.items, f)
