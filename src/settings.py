@@ -28,6 +28,7 @@ DOWNLOADER_MIDDLEWARES = {
 
 ITEM_PIPELINES = {
     "src.pipelines.CatalogItemPipeline": 300,
+    "src.pipelines.DetailItemPipeline": 400,
 }
 
 # Set settings whose default value is deprecated to a future-proof value

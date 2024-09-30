@@ -5,15 +5,15 @@ from io import TextIOWrapper
 from scrapy import Item, Spider
 
 from ..conf import CACHE_DIR
-from ..items import Catalog, CatalogItem
+from ..items import Detail, DetailItem
 from ..util import AdministrativeArea
 
-__all__ = ["CatalogItemPipeline"]
+__all__ = ["DetailItemPipeline"]
 
 
-class CatalogItemPipeline(object):
-    cache_path = CACHE_DIR / "catalogs.pickle"
-    items: dict[AdministrativeArea, list[Catalog]] = {}
+class DetailItemPipeline(object):
+    cache_path = CACHE_DIR / "details.pickle"
+    items: dict[AdministrativeArea, list[Detail]] = []
     _file: TextIOWrapper
     _finalizer: weakref.finalize
 
@@ -26,9 +26,9 @@ class CatalogItemPipeline(object):
         self._finalizer()
 
     def process_item(self, item: Item, spider: Spider) -> Item:
-        if not isinstance(item, CatalogItem):
+        if not isinstance(item, DetailItem):
             return item
         if item["area"] not in self.items.keys():
             self.items[item["area"]] = []
-        self.items[item["area"]].append(item["catalog"])
+        self.items[item["area"]].append(item["detail"])
         return item
