@@ -1,10 +1,10 @@
-from typing import Iterable
+from typing import Iterable, override
 
 from scrapy import Request, Spider
 from scrapy.http import Response
 
 from ..conf import CONFIG
-from ..items import CatalogItem
+from ..items import Catalog, CatalogItem
 from ..util import AdministrativeArea, administrative_nodes, alibaba_search_url
 
 __all__ = ["CatalogSpider"]
@@ -18,29 +18,24 @@ class CatalogSpider(Spider):
     name = "catalog"
     allowed_domains = ["alibaba.com"]
 
+    @override
     def start_requests(self) -> Iterable[Request]:
         # search all node elements of administrative area trees
         #
         # for each area, there should be more requests yielded by the `parse` method, as
         # we only starts with the first pages of a single area's search results.
         for node in administrative_nodes():
-            yield Request(alibaba_search_url(node.address))
+            yield Request(alibaba_search_url(node.address), meta={"area": node})
 
+    @override
     def parse(self, response: Response):
         xpaths: dict[str, str] = CONFIG["xpath"]["catalog"]
-
-        # decide area
-        area: AdministrativeArea = None
-        for node in administrative_nodes():
-            if node.address.lower() in response.request.url.lower():
-                area = node
-                break
-        assert area is not None, "unrecognized area"
+        area: AdministrativeArea = response.meta["area"]
 
         # checks if there's next page
         next_page = response.xpath(xpaths["next-page-link"]).extract_first()
         if next_page:
-            yield Request(url="https://alibaba.com" + next_page)
+            yield Request(url="https://alibaba.com" + next_page, meta={"area": area})
 
         # every card contains some information about the supplier
         cards = response.xpath(xpaths["card"])
@@ -59,10 +54,7 @@ class CatalogSpider(Spider):
             detail_url = "https:" + detail_url
             yield CatalogItem(
                 {
-                    "detail_url": detail_url,
-                    "domain": domain,
-                    "name": name,
-                    "provided_products": products,
+                    "catalog": Catalog(detail_url, domain, name, products),
                     "area": area,
                 }
             )

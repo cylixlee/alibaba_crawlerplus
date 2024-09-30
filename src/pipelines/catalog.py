@@ -22,6 +22,6 @@ class CatalogItemPipeline(object):
     def _synchronize(self, item: CatalogItem) -> None:
         if item["area"] not in self.items.keys():
             self.items[item["area"]] = []
-        self.items[item["area"]].append(Catalog.from_item(item))
+        self.items[item["area"]].append(item["catalog"])
         with open(self.cache_path, "wb") as f:
             pickle.dump(self.items, f)
