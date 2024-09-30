@@ -5,7 +5,12 @@ from typing import override
 
 from ..conf import CONFIG
 
-__all__ = ["AdministrativeArea", "administrative_roots", "administrative_nodes"]
+__all__ = [
+    "AdministrativeArea",
+    "administrative_roots",
+    "administrative_nodes",
+    "search_administrative",
+]
 
 
 @dataclass
@@ -64,6 +69,15 @@ def administrative_nodes() -> list[AdministrativeArea]:
     return nodes
 
 
+def search_administrative(address: str) -> list[AdministrativeArea] | None:
+    address = address.lower()
+    for node in administrative_nodes():
+        result = _search_administrative(address, node)
+        if result:
+            return result
+    return None
+
+
 def _parse_administrative_area(data: dict) -> AdministrativeArea:
     area = AdministrativeArea(data["address"], data["name"], None)
     if "children" in data.keys():
@@ -72,3 +86,17 @@ def _parse_administrative_area(data: dict) -> AdministrativeArea:
             children.append(_parse_administrative_area(child_data))
         area.children = children
     return area
+
+
+def _search_administrative(
+    address: str,
+    area: AdministrativeArea,
+) -> list[AdministrativeArea]:
+    if area.children:
+        for child in area.children:
+            childresult = _search_administrative(address, child)
+            if childresult:
+                return [area.name, *childresult]
+    if area.address.lower() in address:
+        return [area.name]
+    return None
