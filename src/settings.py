@@ -23,11 +23,12 @@ DOWNLOAD_DELAY = 3
 
 DOWNLOADER_MIDDLEWARES = {
     "src.middlewares.RandomUserAgentMiddleware": 543,
+    "src.middlewares.InteractiveCaptchaMiddleware": 553,
 }
 
-# ITEM_PIPELINES = {
-#    "src.pipelines.SrcPipeline": 300,
-# }
+ITEM_PIPELINES = {
+    "src.pipelines.CatalogItemPipeline": 300,
+}
 
 # Set settings whose default value is deprecated to a future-proof value
 REQUEST_FINGERPRINTER_IMPLEMENTATION = "2.7"

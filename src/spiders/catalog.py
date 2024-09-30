@@ -28,18 +28,15 @@ class CatalogSpider(Spider):
 
     def parse(self, response: Response):
         xpaths: dict[str, str] = CONFIG["xpath"]["catalog"]
-        i = 1
-        while True:
-            detail_url = response.xpath(xpaths["detail-url"].format(i)).extract_first()
-            name = response.xpath(xpaths["name"].format(i)).extract_first()
-            products = response.xpath(xpaths["products"].format(i)).extract_first()
 
-            # breaks if there's no more catalog
-            if not detail_url:
-                break
-            i += 1
+        # every card contains some information about the supplier
+        cards = response.xpath(xpaths["card"]).extract()
+        for card in cards:
+            detail_url = card.xpath(xpaths["detail-url"]).extract_first()
+            name = card.xpath(xpaths["name"]).extract_first()
+            products = card.xpath(xpaths["products"]).extract_first()  # may be None
 
-            # yields a CatalogItem
+            # validate data, set products to an empty string if None
             assert detail_url and name, "corrupted data"
             if not products:
                 products = ""
