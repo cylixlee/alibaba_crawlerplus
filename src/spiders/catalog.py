@@ -1,6 +1,7 @@
 from typing import Iterable
 
 from scrapy import Request, Spider
+from scrapy.exceptions import DropItem
 from scrapy.http import Response
 
 from ..conf import CONFIG
@@ -45,7 +46,8 @@ class CatalogSpider(Spider):
             products = card.xpath(xpaths["products"]).extract_first()  # may be None
 
             # validate data, set products to an empty string if None
-            assert detail_url and name, "corrupted data"
+            if not detail_url and not name:
+                raise DropItem()
             if not products:
                 products = ""
 

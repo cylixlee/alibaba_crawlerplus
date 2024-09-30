@@ -54,6 +54,7 @@ class InteractiveCaptchaMiddleware(object):
         """
         if _is_captcha(response.body):
             return self._process_captcha(request.url)
+        return response
 
     def process_request(self, request: Request, spider: Spider):
         """
