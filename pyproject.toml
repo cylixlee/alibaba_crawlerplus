@@ -1,7 +1,7 @@
 [tool.poetry]
 package-mode = false
 name = "alibaba-crawlerplus-v2"
-version = "2.0.2"
+version = "2.1.0"
 description = "Alibaba crawler with brand new architecture."
 authors = ["Cylix Lee <cylix.lee@outlook.com>"]
 license = "Apache-2.0"

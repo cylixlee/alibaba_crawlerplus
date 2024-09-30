@@ -13,8 +13,8 @@ def inspect_main() -> None:
         data: dict[AdministrativeArea, list[Catalog]] = pickle.load(f)
     for area, catalogs in data.items():
         print(f"=== for area {area.name} ({len(catalogs)})====")
-        for catalog in catalogs:
-            print(catalog)
+        # for catalog in catalogs:
+        #     print(catalog.name)
 
 
 def debugger_main() -> None:
@@ -22,5 +22,5 @@ def debugger_main() -> None:
 
 
 if __name__ == "__main__":
-    # inspect_main()
-    debugger_main()
+    inspect_main()
+    # debugger_main()

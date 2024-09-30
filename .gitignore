@@ -1,7 +1,3 @@
-# Cache and checkpoints
-cache/
-checkpoint/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
