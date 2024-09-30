@@ -67,8 +67,8 @@ next-page-link = '//div[@class="searchx-pagination"]/a[2]/@href' # single elemen
 
 [xpath.detail]
 bill = [
-    '//*[@id="8919138051"]/div/div/div/div[3]/div/table/tr[3]/td[2]/div/div/div',
-    '//*[@id="8945312245"]/div/div[2]/div[1]/ul/li[3]/strong',
+    '//*[@id="8919138051"]/div/div/div/div[3]/div/table/tr[3]/td[2]/div/div/div/text()',
+    '//*[@id="8945312245"]/div/div[2]/div[1]/ul/li[3]/strong/text()',
 ]
-address = '//*[@id="8919138051"]/div/div/div/div[3]/div/table/tr[1]/td[4]/div/div/div'
-orders = '//*[@id="8945312245"]/div/div[2]/div[1]/ul/li[3]/div'
+address = '//*[@id="8919138051"]/div/div/div/div[3]/div/table/tr[1]/td[4]/div/div/div/text()'
+orders = '//*[@id="8945312245"]/div/div[2]/div[1]/ul/li[3]/div/text()'

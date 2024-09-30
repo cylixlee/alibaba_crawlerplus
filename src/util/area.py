@@ -69,7 +69,9 @@ def administrative_nodes() -> list[AdministrativeArea]:
     return nodes
 
 
-def search_administrative(address: str) -> list[AdministrativeArea] | None:
+def search_administrative(address: str | list[str]) -> list[AdministrativeArea] | None:
+    if isinstance(address, list):
+        address = " ".join(address)
     address = address.lower()
     for node in administrative_nodes():
         result = _search_administrative(address, node)

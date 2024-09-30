@@ -39,7 +39,7 @@ class DetailSpider(Spider):
         bill = _fuzzy_select(response, xpaths["bill"])
         address = _fuzzy_select(response, xpaths["address"])
         orders = _fuzzy_select(response, xpaths["orders"])
-        administrative_address = search_administrative(address)
+        administrative_address = search_administrative([address, catalog.name])
 
         yield DetailItem(
             {
