@@ -61,3 +61,4 @@ def _fuzzy_select(response: Response, xpath: str | list[str]) -> str:
         result: SelectorList[Selector] = response.xpath(x)
         if len(result) > 0:
             return result.extract_first()
+    return ""
