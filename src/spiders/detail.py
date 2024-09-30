@@ -2,9 +2,8 @@ import pickle
 from dataclasses import asdict
 from typing import Iterable, override
 
-from scrapy import Selector, Spider
+from scrapy import Spider
 from scrapy.http import Request, Response
-from scrapy.selector import SelectorList
 
 from ..conf import CACHE_DIR, CONFIG
 from ..items import Catalog, Detail, DetailItem
@@ -56,9 +55,9 @@ class DetailSpider(Spider):
 
 def _fuzzy_select(response: Response, xpath: str | list[str]) -> str:
     if isinstance(xpath, str):
-        return response.xpath(xpath).extract_first()
+        xpath = [xpath]
     for x in xpath:
-        result: SelectorList[Selector] = response.xpath(x)
-        if len(result) > 0:
-            return result.extract_first()
+        result = response.xpath(x).extract_first()
+        if result:
+            return result
     return ""

@@ -13,7 +13,7 @@ __all__ = ["DetailItemPipeline"]
 
 class DetailItemPipeline(object):
     cache_path = CACHE_DIR / "details.pickle"
-    items: dict[AdministrativeArea, list[Detail]] = []
+    items: dict[AdministrativeArea, list[Detail]] = {}
     _file: TextIOWrapper
     _finalizer: weakref.finalize
 
