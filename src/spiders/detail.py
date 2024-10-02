@@ -18,10 +18,21 @@ class DetailSpider(Spider):
 
     @override
     def start_requests(self) -> Iterable[Request]:
-        # start to crawl detail pages according to catalogs.
+        # load catalogs data to start crawling.
         with open(CACHE_DIR / "catalogs.pickle", "rb") as f:
-            cache: dict[AdministrativeArea, list[Catalog]] = pickle.load(f)
-        for area, catalogs in cache.items():
+            catalogs_cache: dict[AdministrativeArea, list[Catalog]] = pickle.load(f)
+
+        # if there's already part of the details, de-duplicate them.
+        cache_path = CACHE_DIR / "details.pickle"
+        if cache_path.exists():
+            with open(cache_path, "rb") as f:
+                details_cache: dict[AdministrativeArea, list[Detail]] = pickle.load(f)
+            for area, details in details_cache.items():
+                print(f"Skipping {len(details)} records in area {area.name}.")
+                catalogs_cache[area] = catalogs_cache[area][len(details) :]
+
+        # yield requests to the engine.
+        for area, catalogs in catalogs_cache.items():
             for catalog in catalogs:
                 meta = {
                     "catalog": catalog,
