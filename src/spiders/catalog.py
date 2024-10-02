@@ -28,7 +28,7 @@ class CatalogSpider(Spider):
             yield Request(alibaba_search_url(node.address), meta={"area": node})
 
     @override
-    def parse(self, response: Response):
+    def parse(self, response: Response) -> Iterable[Request | CatalogItem]:
         xpaths: dict[str, str] = CONFIG["xpath"]["catalog"]
         area: AdministrativeArea = response.meta["area"]
 

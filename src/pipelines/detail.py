@@ -16,14 +16,14 @@ class DetailItemPipeline(object):
     items: dict[AdministrativeArea, list[Detail]] = {}
     _finalizer: weakref.finalize
 
-    def open_spider(self, spider: Spider):
+    def open_spider(self, spider: Spider) -> None:
         def finalizer(data: dict, path: pathlib.Path) -> None:
             with open(path, "wb") as file:
                 pickle.dump(data, file=file)
 
         self._finalizer = weakref.finalize(self, finalizer, self.items, self.cache_path)
 
-    def close_spider(self, spider: Spider):
+    def close_spider(self, spider: Spider) -> None:
         self._finalizer()
 
     def process_item(self, item: Item, spider: Spider) -> Item:

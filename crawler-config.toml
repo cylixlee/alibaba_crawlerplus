@@ -35,7 +35,7 @@ name = "姜堰区"
 # NOTE: all parameters except `path` should be inspected carefully before changing their
 # values. They're inherited from seniors' code and I don't exacly know the reason.
 [chrome-driver]
-path = "D:/Workspace/WebDrivers/Chrome 129.0.6668.58/chromedriver.exe"
+path = "D:\\ProgramData\\WebDrivers\\Chrome\\129.0.6668.58\\chromedriver.exe"
 arguments = [
     "log-level=3",
     "--incognito",

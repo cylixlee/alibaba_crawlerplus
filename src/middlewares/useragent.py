@@ -16,5 +16,5 @@ class RandomUserAgentMiddleware(object):
 
     ua: ClassVar[UserAgent] = UserAgent(platforms="pc")
 
-    def process_request(self, request: Request, spider: Spider):
+    def process_request(self, request: Request, spider: Spider) -> None:
         request.headers["User-Agent"] = __class__.ua.random

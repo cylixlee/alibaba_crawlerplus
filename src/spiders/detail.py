@@ -30,7 +30,7 @@ class DetailSpider(Spider):
                 yield Request(url=catalog.detail_url, meta=meta)
 
     @override
-    def parse(self, response: Response):
+    def parse(self, response: Response) -> Iterable[DetailItem]:
         xpaths = CONFIG["xpath"]["detail"]
         catalog: Catalog = response.meta["catalog"]
         area: AdministrativeArea = response.meta["area"]

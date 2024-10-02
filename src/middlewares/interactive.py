@@ -2,7 +2,7 @@ import time
 import weakref
 
 from scrapy import Request, Spider
-from scrapy.http import HtmlResponse
+from scrapy.http import HtmlResponse, Response
 from selenium.webdriver import Chrome, ChromeOptions, ChromeService, Remote
 
 from ..conf import CONFIG
@@ -44,7 +44,7 @@ class InteractiveMiddleware(object):
         self.driver.maximize_window()
         weakref.finalize(self, lambda d: d.quit(), self.driver)
 
-    def process_request(self, request: Request, spider: Spider):
+    def process_request(self, request: Request, spider: Spider) -> Response:
         self.driver.maximize_window()
         self.driver.get(request.url)
         # detect whether the captcha has caught us
