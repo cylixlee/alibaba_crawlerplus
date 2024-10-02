@@ -1,6 +1,6 @@
+import pathlib
 import pickle
 import weakref
-from io import TextIOWrapper
 
 from scrapy import Item, Spider
 
@@ -14,15 +14,16 @@ __all__ = ["CatalogItemPipeline"]
 class CatalogItemPipeline(object):
     cache_path = CACHE_DIR / "catalogs.pickle"
     items: dict[AdministrativeArea, list[Catalog]] = {}
-    _file: TextIOWrapper
     _finalizer: weakref.finalize
 
     def open_spider(self, spider: Spider):
-        self._file = open(self.cache_path, "wb")
-        self._finalizer = weakref.finalize(self, lambda f: f.close(), self._file)
+        def finalizer(data: dict, path: pathlib.Path):
+            with open(path, "wb") as file:
+                pickle.dump(data, file=file)
+
+        self._finalizer = weakref.finalize(self, finalizer, self.items, self.cache_path)
 
     def close_spider(self, spider: Spider):
-        pickle.dump(self.items, self._file)
         self._finalizer()
 
     def process_item(self, item: Item, spider: Spider) -> Item:
