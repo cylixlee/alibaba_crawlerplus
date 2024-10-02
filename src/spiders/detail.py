@@ -29,7 +29,21 @@ class DetailSpider(Spider):
                 details_cache: dict[AdministrativeArea, list[Detail]] = pickle.load(f)
             for area, details in details_cache.items():
                 print(f"Skipping {len(details)} records in area {area.name}.")
-                catalogs_cache[area] = catalogs_cache[area][len(details) :]
+
+                # eliminate duplicate targets.
+                #
+                # due to the concurrency inside Scrapy, we cannot assume that DetailItems
+                # are saved in the same order of CatalogItems.
+                targets: list[Catalog] = []
+                for catalog in catalogs_cache[area]:
+                    has_requested = False
+                    for detail in details:
+                        if detail.is_result_of(catalog):
+                            has_requested = True
+                            break
+                    if not has_requested:
+                        targets.append(catalog)
+                catalogs_cache[area] = targets
 
         # yield requests to the engine.
         for area, catalogs in catalogs_cache.items():

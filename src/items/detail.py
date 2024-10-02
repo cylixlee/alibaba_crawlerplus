@@ -14,6 +14,14 @@ class Detail(Catalog):
     bill: str
     orders: str
 
+    def is_result_of(self, catalog: Catalog) -> bool:
+        return (
+            self.detail_url == catalog.detail_url
+            and self.domain == catalog.domain
+            and self.name == catalog.name
+            and self.provided_products == catalog.provided_products
+        )
+
 
 class DetailItem(Item):
     detail = Field()
