@@ -47,7 +47,7 @@ class SheetWriter(object):
 def sheetwriter_main() -> None:
     headers = OrderedDict(
         orderdate="订单日期\n（格式：YYYYMMDD）",
-        name="营业单位（中文名称）",
+        name="营业单位\n（中文名称）",
         domain="店铺名称",
         city="市",
         district="区县",
