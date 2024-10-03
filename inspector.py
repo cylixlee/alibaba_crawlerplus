@@ -1,7 +1,5 @@
 import pickle
 
-from scrapy import cmdline
-
 from src.conf import CACHE_DIR
 from src.items import Catalog, Detail
 from src.util import AdministrativeArea
@@ -25,10 +23,5 @@ def inspect_main() -> None:
         #     print(f"\t{detail}")
 
 
-def debugger_main() -> None:
-    cmdline.execute("scrapy crawl detail".split())
-
-
 if __name__ == "__main__":
     inspect_main()
-    # debugger_main()
