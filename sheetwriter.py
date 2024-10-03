@@ -86,6 +86,15 @@ def sheetwriter_main() -> None:
                     district = detail.administrative_address[1]
                 else:
                     district = ""
+                f.write(
+                    name=detail.name,
+                    domain=detail.domain,
+                    city=city,
+                    district=district,
+                    orders=detail.orders,
+                    bills=detail.bill,
+                    provide=detail.provided_products,
+                )
             else:
                 city = ""
                 district = ""
@@ -98,16 +107,6 @@ def sheetwriter_main() -> None:
                 bills=detail.bill,
                 provide=detail.provided_products,
             )
-            if city and district:
-                f.write(
-                    name=detail.name,
-                    domain=detail.domain,
-                    city=city,
-                    district=district,
-                    orders=detail.orders,
-                    bills=detail.bill,
-                    provide=detail.provided_products,
-                )
         u.fillcolumn("currency", "美元")
         u.fillcolumn("platform", "阿里巴巴国际站")
         f.fillcolumn("currency", "美元")
