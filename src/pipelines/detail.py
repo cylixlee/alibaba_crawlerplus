@@ -40,4 +40,5 @@ class DetailItemPipeline(object):
         if item["area"] not in self.items.keys():
             self.items[item["area"]] = []
         self.items[item["area"]].append(item["detail"])
+        print(f"Processed item {item["detail"].detail_url}")
         return item

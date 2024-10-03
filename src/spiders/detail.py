@@ -28,7 +28,7 @@ class DetailSpider(Spider):
             with open(cache_path, "rb") as f:
                 details_cache: dict[AdministrativeArea, list[Detail]] = pickle.load(f)
             for area, details in details_cache.items():
-                print(f"Skipping {len(details)} records in area {area.name}.")
+                print(f"=== Skipping {len(details)} records in area {area.name} ===")
 
                 # eliminate duplicate targets.
                 #
@@ -39,6 +39,7 @@ class DetailSpider(Spider):
                     has_requested = False
                     for detail in details:
                         if detail.is_result_of(catalog):
+                            # print(f" >> Skipped {detail.detail_url}")
                             has_requested = True
                             break
                     if not has_requested:
